@@ -78,6 +78,7 @@
   }
   .framever01-text012 {
     color: rgba(0, 0, 0, 1);
+    width: auto;
     height: auto;
     font-size: 20px;
     align-self: stretch;
