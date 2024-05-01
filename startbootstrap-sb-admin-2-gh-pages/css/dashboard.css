@@ -52,7 +52,7 @@
     width: 64px;
     height: 64px;
     display: flex;
-    padding: 19px 6px;
+    /* padding: 19px 6px; */
     overflow: hidden;
     box-shadow: 1px 2px 3px 0px rgba(0, 0, 0, 0.25) ;
     align-items: center;
@@ -63,8 +63,8 @@
     background-color: rgba(255, 255, 255, 1);
   }
   .framever01-image22 {
-    width: 54px;
-    height: 45px;
+    width: 64px; /*크기 변경*/
+    height: 64px; /*크기 변경*/
   }
   .framever01-frame76 {
     gap: 4px;
@@ -154,6 +154,7 @@
     height: auto;
     font-size: 15px;
     align-self: stretch;
+    align-items: center; /*추가*/
     font-style: Regular;
     text-align: left;
     font-family: AppleSDGothicNeoEB00;
