@@ -1,4 +1,3 @@
-
   /* .framever01-frame107 {
     gap: 40px;
     display: flex;
@@ -18,13 +17,13 @@
     /* box-shadow: 1px 4px 10px 0px rgba(0, 0, 0, 0.25) ; */
     align-items: flex-start;
     /* flex-shrink: 0; */
-    border-radius: 10px;
+    /* border-radius: 10px; */
     flex-direction: column;
     /* background-color: rgba(255, 255, 255, 1); */
   }
   .framever01-frame85 {
     gap: 30px;
-    /* width: 387.33331298828125px; */
+    width: 100%; /*수정*/
     display: flex;
     padding: 10px 0;
     align-items: center;
@@ -52,7 +51,7 @@
     width: 64px;
     height: 64px;
     display: flex;
-    padding: 19px 6px;
+    /* padding: 19px 6px; */
     overflow: hidden;
     box-shadow: 1px 2px 3px 0px rgba(0, 0, 0, 0.25) ;
     align-items: center;
@@ -63,8 +62,8 @@
     background-color: rgba(255, 255, 255, 1);
   }
   .framever01-image22 {
-    width: 54px;
-    height: 45px;
+    width: 64px; /*수정*/
+    height: 64px; /*수정*/
   }
   .framever01-frame76 {
     gap: 4px;
@@ -128,9 +127,14 @@
     gap: 137px;
     display: flex;
     align-self: stretch;
-    align-items: flex-start;
+    align-items: center;
     flex-shrink: 0;
     justify-content: space-between;
+    width: 100%;
+  }
+  .framever01-progressbar{
+    width: 100%;
+    flex: 1;
   }
   .framever01-frame181 {
     gap: 15px;
@@ -152,8 +156,10 @@
     color: rgba(101, 103, 109, 1);
     width: 205px;
     height: auto;
+    display: flex;
     font-size: 15px;
     align-self: stretch;
+    align-items:center;
     font-style: Regular;
     text-align: left;
     font-family: AppleSDGothicNeoEB00;
@@ -218,22 +224,6 @@
     flex-grow: 1;
     align-items: flex-start;
     flex-shrink: 1;
-  }
-  .framever01-rectangle2 {
-    top: 0px;
-    left: 0px;
-    width: 388px;
-    height: 8px;
-    position: absolute;
-    border-radius: 10px;
-  }
-  .framever01-rectangle3 {
-    top: 0.5px;
-    left: 0px;
-    width: 141px;
-    height: 8px;
-    position: absolute;
-    border-radius: 10px;
   }
   .framever01-frame82 {
     gap: 12px;
