@@ -154,7 +154,7 @@
   }
   .framever01-text016 {
     color: rgba(101, 103, 109, 1);
-    width: 205px;
+    width: auto;
     height: auto;
     display: flex;
     font-size: 15px;
@@ -199,7 +199,7 @@
     position: absolute;
     font-size: 18px;
     font-style: Regular;
-    text-align: left;
+    text-align: center;
     font-family: AppleSDGothicNeoEB00;
     font-weight: 400;
     line-height: normal;
@@ -605,4 +605,37 @@
     font-stretch: normal;
     text-decoration: none;
   }
-  
+  .framever01-group15 {
+    width: 15px;
+    height: 26px;
+    display: flex;
+    position: relative;
+    align-items: flex-start;
+    flex-shrink: 1;
+  }
+  .framever01-text055 {
+    color: rgba(0, 0, 0, 1);
+    width: 15px;
+    height: auto;
+    position: absolute;
+    font-size: 18px;
+    font-style: Regular;
+    text-align: center;
+    font-family: AppleSDGothicNeoEB00;
+    font-weight: 400;
+    line-height: normal;
+    font-stretch: normal;
+    text-decoration: none;
+  }
+  .framever01-frame183 {
+    gap: 0px;
+    height: auto;
+    display: flex;
+    padding: 5px 20px;
+    overflow: hidden;
+    flex-grow: 1;
+    align-items: flex-start;
+    flex-shrink: 0;
+    border-radius: 10px;
+    background-color: rgba(248, 161, 136, 1);
+  }
