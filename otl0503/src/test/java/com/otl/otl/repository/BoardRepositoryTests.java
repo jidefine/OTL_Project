@@ -79,4 +79,13 @@ public class BoardRepositoryTests {
 
     }
 
+    @Test
+    public void testDelete() {
+        int board_id = 10;
+
+        Long bno = Long.valueOf(board_id); // int를 Long으로 변환
+
+        boardRepository.deleteById(bno);
+    }
+
 }
