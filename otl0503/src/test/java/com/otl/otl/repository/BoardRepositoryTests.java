@@ -48,5 +48,19 @@ public class BoardRepositoryTests {
         });
     }
 
+    @Test
+    public void testSelect() {
+        int board_id = 10;
+
+        Long bno = Long.valueOf(board_id); // int를 Long으로 변환
+
+        Optional<Board> result = boardRepository.findById(bno);
+
+        Board board = result.orElseThrow();
+
+        log.info(board);
+
+    }
+
 
 }
