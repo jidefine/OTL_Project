@@ -27,4 +27,9 @@ public class Board extends BaseEntity {
     @Column(name = "board_isDeleted", nullable = false, columnDefinition = "boolean default false") // 기본값 설정
     @Builder.Default
     private boolean isDeleted = false; // 삭제여부, 기본값 설정
+
+    public void change(String title, String content){
+        this.board_title = title;
+        this.board_content = content;
+    }
 }

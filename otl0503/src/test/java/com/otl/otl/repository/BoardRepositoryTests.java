@@ -62,5 +62,21 @@ public class BoardRepositoryTests {
 
     }
 
+    @Test
+    public void testUpdate() {
+
+        int board_id = 9;
+
+        Long bno = Long.valueOf(board_id); // int를 Long으로 변환
+
+        Optional<Board> result = boardRepository.findById(bno);
+
+        Board board = result.orElseThrow();
+
+        board.change("update..title 9", "update 되나요?");
+
+        boardRepository.save(board);
+
+    }
 
 }
