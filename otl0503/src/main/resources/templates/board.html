@@ -196,36 +196,36 @@
                                     </div>
 
                                     <!-- Modal Body -->
-                                    <div class="modal-body" style="color: black;">
+                                    <div class="board modal-body" style="color: black;">
 
                                         <!-- 게시글 제목 -->
-                                        <div class="row mb-3">
+                                        <div class="board_title row mb-3">
                                             <label class="col-sm-2.5 col-form-label">제목</label>
                                             <div class="col-sm-8">
                                                 <input type="text" class="form-control" placeholder="제목을 입력하세요">
                                             </div>
                                         </div>
                                         <!-- 작성자 프로필 이미지, 작성자, 작성일, 수정일-->
-                                        <div class="writer-container d-flex align-items-center justify-content-between"
+                                        <div class="board-container d-flex align-items-center justify-content-between"
                                              style="margin-bottom: 20px;">
                                             <!-- 작성자 프로필 이미지 -->
                                             <img src="${sPath}img/꺄.jpeg" alt="profillll" class="writer-container rounded-circle"
                                                  style="width: 50px; height: 50px;">
                                             <!-- 작성자 -->
-                                            <span class="writer-container writer-name">작성자</span>
+                                            <span class="board-container email">작성자</span>
                                             <!-- 작성일 -->
-                                            <span class="writer-container create-date">작성일</span>
+                                            <span class="board-container board_createDate">작성일</span>
                                             <!-- 수정일 -->
-                                            <span class="writer-container update-date">수정일</span>
+                                            <span class="board-container board_modDate">수정일</span>
                                         </div>
                                         <!--게시판 주의사항-->
-                                        <div class="rounded p-2" style="margin-bottom: 20px; background-color: silver;">
+                                        <div class="board_warning rounded p-2" style="margin-bottom: 20px; background-color: silver;">
                                             <div class="writer-container text-center">
                                                 <span class="font-weight-bolder">※ 회원 간 불쾌한 언급은 서비스 이용에 불이익을 받게 됩니다. ※</span>
                                             </div>
                                         </div>
                                         <!-- 게시글 내용 -->
-                                        <div class="row mb-3">
+                                        <div class="board_content row mb-3">
                                             <label class="col-sm-2.5 col-form-label">내용</label>
                                             <div class="col flex-grow-1">
                                                <textarea type="text" class="form-control"
