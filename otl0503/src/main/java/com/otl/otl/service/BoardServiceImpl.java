@@ -1,26 +1,29 @@
-package com.otl.otl.service;
+package com.otl.otl.repository.search;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
-import org.modelmapper.ModelMapper;
-import org.springframework.stereotype.Service;
+import com.querydsl.jpa.JPQLQuery;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 import com.otl.otl.domain.Board;
-import com.otl.otl.dto.BoardDTO;
+//import com.otl.otl.domain.QBoard;
 
-@Service
-@Log4j2
-@RequiredArgsConstructor
-//@Transactional
-public class BoardServiceImpl implements BoardService{
-    private final ModelMapper modelMapper;
-    //private final BoardRepository boardRepository;
+public class BoardSearchImpl extends QuerydslRepositorySupport implements BoardSearch{
+
+    public BoardSearchImpl(){
+        super(Board.class);
+    }
 
     @Override
-    public Long register(BoardDTO boardDTO) {
-        Board board = modelMapper.map(boardDTO, Board.class);
+    public Page<Board> search1(Pageable pageable) {
+//        QBoard board = QBoard.board;
+//        JPQLQuery<Board> query = from(board);
+//        query.where(board.board_title.contains("1"));
 
-        //Long board_id = boardRepository.save(board).getBno();
-        //return board_id;
+        return null;
+    }
+
+    @Override
+    public Page<Board> searchAll(String[] types, String keyword, Pageable pageable) {
         return null;
     }
 }
