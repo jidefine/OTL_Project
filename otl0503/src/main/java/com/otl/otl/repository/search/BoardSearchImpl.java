@@ -5,7 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 import com.otl.otl.domain.Board;
-import com.otl.otl.domain.QBoard;
+//import com.otl.otl.domain.QBoard;
 
 public class BoardSearchImpl extends QuerydslRepositorySupport implements BoardSearch{
 
