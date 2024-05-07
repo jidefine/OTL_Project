@@ -9,8 +9,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import org.springframework.transaction.annotation.Transactional;
-
 import java.util.Optional;
 
 @SpringBootTest
@@ -24,7 +22,6 @@ public class BoardServiceTests {
     private MemberRepository memberRepository;
 
     @Test
-    @Transactional
     public void testRegister() {
 
         log.info(boardService.getClass().getName());
@@ -45,5 +42,13 @@ public class BoardServiceTests {
         // 게시글 저장
         Long board_id = boardService.register(boardDTO);
         log.info("board_id: " + board_id);
+    }
+
+    @Test
+    public void testRead(){
+
+        BoardDTO boardDTO = boardService.readOne(24L);
+
+        log.info(boardDTO);
     }
 }
