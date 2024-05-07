@@ -113,4 +113,23 @@ public class BoardRepositoryTests {
 
 
     }
+
+    @Test
+    public void testSearch1(){
+        Pageable pageable = PageRequest.of(1, 10, Sort.by("board_id").descending());
+
+        boardRepository.search1(pageable);
+    }
+
+    @Test
+    public void testSearchAll(){
+        // title, content, writer
+        String[] types = {"t", "c", "w"};
+
+        String keyword = "1";
+
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("board_id").descending());
+
+        Page<Board> result = boardRepository.searchAll(types, keyword, pageable);
+    }
 }
