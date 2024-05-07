@@ -52,5 +52,13 @@ public class BoardServiceImpl implements BoardService{
         board.change(boardDTO.getBoard_title(), boardDTO.getBoard_content());
     }
 
+    @Override
+    public void remove(BoardDTO boardDTO) {
+        Optional<Board> result = boardRepository.findById((long) boardDTO.getBoard_id());
+
+        Board board = result.orElseThrow();
+
+        board.delete(); // 삭제 처리
+    }
 
 }

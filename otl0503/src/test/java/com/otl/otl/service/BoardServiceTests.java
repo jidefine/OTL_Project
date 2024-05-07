@@ -62,4 +62,13 @@ public class BoardServiceTests {
 
         boardService.modify(boardDTO);
     }
+
+    @Test
+    public void testDelete(){
+        BoardDTO boardDTO = BoardDTO.builder()
+                .board_id(17)
+                .build();
+
+        boardService.remove(boardDTO);
+    }
 }
