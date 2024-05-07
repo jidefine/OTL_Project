@@ -51,4 +51,15 @@ public class BoardServiceTests {
 
         log.info(boardDTO);
     }
+
+    @Test
+    public void testModify(){
+        BoardDTO boardDTO = BoardDTO.builder()
+                .board_id(24)
+                .board_title("Updated....101")
+                .board_content("Updated content 101...")
+                .build();
+
+        boardService.modify(boardDTO);
+    }
 }
