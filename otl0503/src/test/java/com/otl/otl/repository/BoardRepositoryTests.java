@@ -93,10 +93,13 @@ public class BoardRepositoryTests {
     @Test
     public void testPaging() {
 
-        //1 page order by bno desc
-        Pageable pageable = PageRequest.of(0,10, Sort.by("board_id").descending());
+        //List<Board> result = boardRepository.findAll();
 
-        Page<Board> result = boardRepository.findAll(pageable);
+        //1 page order by bno desc
+        Pageable pageable = PageRequest.of(0,10, Sort.by("regDate").descending());
+
+        //Page<Board> result = boardRepository.findAll(pageable);
+        Page<Board> result = boardRepository.findByIsDeletedFalse(pageable);
 
 
         log.info("total count: "+result.getTotalElements());

@@ -28,4 +28,6 @@ public class BoardDTO {
     private LocalDateTime regDate; //게시물 생성일
 
     private LocalDateTime modDate; //게시물 수정일
+
+    private boolean isDeleted; //삭제 여부
 }
