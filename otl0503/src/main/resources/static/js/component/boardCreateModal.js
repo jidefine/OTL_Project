@@ -1,12 +1,12 @@
 class boardCreateModal extends HTMLElement {
     /** - 작성자 : 유지오
-     * 
+     *
      * data-toggle="modal" data-target="#태그아이디"에서
      * data-target은 보여줄 태그 아이디입니다.
-     * 
+     *
      */
-        connectedCallback() {
-            this.innerHTML = `
+    connectedCallback() {
+        this.innerHTML = `
             <!-- The Modal -->
             <div class="modal fade" id="boardCreateModal" data-backdrop="static">
                 <div class="modal-dialog" style="max-width: 60%;">
@@ -15,7 +15,7 @@ class boardCreateModal extends HTMLElement {
                         <!-- Modal Header -->
                         <div class="modal-header">
                             <h4 class="modal-title font-weight-bolder" style="color: #FD7B38;">자유게시판</h4>
-                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            <button type="button" class="close" data-dismiss="modal">&times</button>
                         </div>
 
                         <!-- Modal Body -->
@@ -26,7 +26,7 @@ class boardCreateModal extends HTMLElement {
                                     <!-- 게시글 제목 -->
                                     <div class="board_title row mb-3">
                                         <label class="col-sm-3 col-form-label">제목</label>
-                                        <div class="col-sm-8">
+                                        <div class="col-sm-11">
                                             <input type="text" class="form-control" placeholder="제목을 입력하세요">
                                         </div>
                                     </div>
@@ -34,7 +34,7 @@ class boardCreateModal extends HTMLElement {
                                     <div class="board-container d-flex align-items-center justify-content-between"
                                          style="margin-bottom: 20px;">
                                         <!-- 작성자 프로필 이미지 -->
-                                        <img src="${sPath}img/꺄.jpeg" alt="profillll" class="writer-container rounded-circle"
+                                        <img src="" alt="profillll" class="writer-container rounded-circle"
                                              style="width: 50px; height: 50px;">
                                         <!-- 작성자 -->
                                         <span class="board-container email">작성자이메일</span>
@@ -42,13 +42,6 @@ class boardCreateModal extends HTMLElement {
                                         <span class="board-container board_createDate">작성일</span>
                                         <!-- 수정일 -->
                                         <span class="board-container board_modDate">수정일</span>
-                                    </div>
-                                    <<!-- 게시글 작성자 -->
-                                    <div class="email row mb-3">
-                                        <label class="col-sm-2.5 col-form-label">이메일</label>
-                                        <div class="col-sm-8">
-                                            <input type="text" class="form-control" placeholder="이메일을 입력하세요">
-                                        </div>
                                     </div>
                                     <!--게시판 주의사항-->
                                     <div class="board_warning rounded p-2" style="margin-bottom: 20px; background-color: silver;">
@@ -69,7 +62,7 @@ class boardCreateModal extends HTMLElement {
 
                                 <!-- Modal Footer -->
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-primary" data-dismiss="modal">작성하기</button>
+                                    <button type="submit" class="btn btn-primary" data-dismiss="modal">작성하기</button>
                                     <button type="button" class="btn btn-danger" data-dismiss="modal">취소</button>
                                 </div>
 
@@ -79,7 +72,7 @@ class boardCreateModal extends HTMLElement {
                 </div>
             </div>
            `;
-        }
     }
-    
-    customElements.define("custom-board-create-modal", boardCreateModal);
+}
+
+customElements.define("custom-board-create-modal", boardCreateModal);
