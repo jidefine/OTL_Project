@@ -20,48 +20,6 @@ import static org.mockito.Mockito.when;
 @SpringBootTest
 public class BoardServiceTests {
 
-//    @Autowired
-//    private BoardService boardService;
-//
-//    // BoardService를 목 객체로 대체합니다.
-//    @MockBean
-//    private MemberRepository memberRepository;
-//
-//    @MockBean
-//    private BoardRepository boardRepository;
-//
-//    // 테스트용 사용자의 이메일 설정
-//    @BeforeEach
-//    public void setUp() {
-//        Authentication authentication = new UsernamePasswordAuthenticationToken("test@example.com", null);
-//        SecurityContextHolder.getContext().setAuthentication(authentication);
-//    }
-//
-//    @Test
-//    public void testRegister() {
-//        // 현재 로그인한 사용자의 이메일 가져오기
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        String email = authentication.getName();
-//
-//        // 테스트용 Member 객체 생성
-//        Member testMember = new Member();
-//        testMember.setEmail("test@example.com");
-//
-//        // memberRepository.findByEmail() 메서드가 호출될 때 testMember를 반환하도록 설정
-//        when(memberRepository.findByEmail(email)).thenReturn(Optional.of(testMember));
-//
-//        // BoardDTO 생성 및 데이터 설정
-//        BoardDTO boardDTO = BoardDTO.builder()
-//                .boardTitle("Sample Title...")
-//                .boardContent("Sample Content...")
-//                .email(email) // 회원 객체 할당
-//                .build();
-//
-//        // 게시글 저장
-//        Long bno = boardService.register(boardDTO);
-//        //log.info("bno: " + bno);
-//    }
-
     @Autowired
     private BoardService boardService;
 
