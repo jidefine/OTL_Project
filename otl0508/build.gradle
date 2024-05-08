@@ -63,20 +63,36 @@ dependencies {
 	implementation 'com.fasterxml.jackson.core:jackson-annotations'
 	implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
 
-	testImplementation 'org.springframework.security:spring-security-test' // 추가
+	implementation 'javax.persistence:persistence-api:1.0.2'
 
-
+	// Spring boot 3.x이상에서 QueryDsl 패키지를 정의하는 방법
+	implementation 'com.querydsl:querydsl-core'
+	implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
+	annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"
+	annotationProcessor "jakarta.annotation:jakarta.annotation-api"
+	annotationProcessor "jakarta.persistence:jakarta.persistence-api"
 }
+
 
 tasks.named('test') {
 	useJUnitPlatform()
 }
 
+// QueryDsl 빌드 옵션 (선택)
+def querydslDir = "$buildDir/generated/querydsl"
+
 sourceSets {
 	main {
 		java {
-			srcDirs = ["$projectDir/src/main/java", "$projectDir/build/generated"]
+			srcDirs = ["$projectDir/src/main/java", "$projectDir/build/generated", querydslDir]
 		}
 	}
 }
 
+tasks.withType(JavaCompile) {
+	options.annotationProcessorGeneratedSourcesDirectory = file(querydslDir)
+}
+
+clean.doLast {
+	file(querydslDir).deleteDir()
+}
