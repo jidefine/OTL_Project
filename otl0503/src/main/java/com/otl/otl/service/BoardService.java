@@ -7,4 +7,5 @@ public interface BoardService {
     BoardDTO readOne(Long board_id); // 조회
     void modify(BoardDTO boardDTO); // 수정
     void remove(BoardDTO boardDTO); // 삭제
+    PageResponseDTO<BoardDTO> list(PageRequestDTO pageRequestDTO);
 }
