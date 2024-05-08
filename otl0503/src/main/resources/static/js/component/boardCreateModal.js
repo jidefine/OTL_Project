@@ -6,6 +6,9 @@ class boardCreateModal extends HTMLElement {
      *
      */
     connectedCallback() {
+        const nickname = this.getAttribute('data-nickname');
+        const memberProfileImage = this.getAttribute('data-profile-image');
+
         this.innerHTML = `
             <!-- The Modal -->
             <div class="modal fade" id="boardCreateModal" data-backdrop="static">
@@ -34,10 +37,10 @@ class boardCreateModal extends HTMLElement {
                                     <div class="board-container d-flex align-items-center justify-content-between"
                                          style="margin-bottom: 20px;">
                                         <!-- 작성자 프로필 이미지 -->
-                                        <img src="" alt="profillll" class="writer-container rounded-circle"
+                                        <img src="${memberProfileImage}" alt="memberProfileImage" class="writer-container rounded-circle"
                                              style="width: 50px; height: 50px;">
                                         <!-- 작성자 -->
-                                        <span class="board-container email">작성자이메일</span>
+                                        <span class="board-container nickname">${nickname}</span>
                                         <!-- 작성일 -->
                                         <span class="board-container board_createDate">작성일</span>
                                         <!-- 수정일 -->
