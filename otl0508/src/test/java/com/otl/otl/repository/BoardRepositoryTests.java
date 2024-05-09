@@ -1,6 +1,6 @@
 package com.otl.otl.repository;
 
-//import lombok.extern.log4j.Log4j2;
+import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,7 +15,7 @@ import java.util.Optional;
 import java.util.stream.IntStream;
 
 @SpringBootTest
-//@Log4j2
+@Log4j2
 public class BoardRepositoryTests {
 
     @Autowired
@@ -56,17 +56,17 @@ public class BoardRepositoryTests {
         Page<Board> result = boardRepository.searchAll(types, keyword, pageable );
 
         //total pages
-        //log.info(result.getTotalPages());
+        log.info(result.getTotalPages());
 
         //pag size
-        //log.info(result.getSize());
+        log.info(result.getSize());
 
         //pageNumber
-        //log.info(result.getNumber());
+        log.info(result.getNumber());
 
         //prev next
-        //log.info(result.hasPrevious() +": " + result.hasNext());
+        log.info(result.hasPrevious() +": " + result.hasNext());
 
-        //result.getContent().forEach(board -> log.info(board));
+        result.getContent().forEach(board -> log.info(board));
     }
 }

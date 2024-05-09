@@ -6,7 +6,7 @@ import com.otl.otl.dto.BoardDTO;
 public interface BoardService {
     Long register(BoardDTO boardDTO);
 
-    BoardDTO readOne(Long board_id); // 조회
+    BoardDTO readOne(Long bno); // 조회
     void modify(BoardDTO boardDTO); // 수정
     void remove(BoardDTO boardDTO); // 삭제
 }
