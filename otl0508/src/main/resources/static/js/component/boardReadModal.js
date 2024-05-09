@@ -6,9 +6,10 @@ class boardReadModal extends HTMLElement {
      *
      */
     connectedCallback() {
-        const boardTitle = this.getAttribute('data-board-title');
-        const boardContent = this.getAttribute('data-board-content');
-        const nickname = this.getAttribute('data-nickname');
+        const bno = this.getAttribute('board.bno');
+        const boardTitle = this.getAttribute('board.boardTitle');
+        const boardContent = this.getAttribute('board.boardContent');
+        const nickname = this.getAttribute('board.nickname');
         const memberProfileImage = this.getAttribute('data-profile-image');
 
         this.innerHTML = `
@@ -20,16 +21,16 @@ class boardReadModal extends HTMLElement {
                         <!-- Modal Header -->
                         <div class="modal-header">
                             <h4 class="modal-title font-weight-bolder" style="color: #FD7B38;">자유게시판</h4>
-                            <button type="button" class="close" data-dismiss="modal">&times</button>
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
                         </div>
 
                         <!-- Modal Body -->
                         <div>
                             <form action="#" method="post">
                                 <div class="modal-body" style="color: black;">
-
                                     <!-- 게시글 제목 -->
                                     <div class="board_title row mb-3">
+                                    <span class="board-container nickname">${bno}</span>
                                         <label class="col-sm-3 col-form-label">제목</label>
                                         <div class="col-sm-11">
                                         <input type="text" class="form-control" value="${boardTitle}">
@@ -64,7 +65,7 @@ class boardReadModal extends HTMLElement {
 
                                 <!-- Modal Footer -->
                                 <div class="modal-footer">
-                                    <button type="submit" class="btn btn-success" data-dismiss="modal">수정하기</button>
+                                    <button type="button" class="btn btn-success" data-dismiss="modal">수정하기</button>
                                     <button type="button" class="btn btn-danger" data-dismiss="modal">취소</button>
                                 </div>
 
@@ -74,6 +75,30 @@ class boardReadModal extends HTMLElement {
                 </div>
             </div>
            `;
+
+        // 모달이 열릴 때마다 요청을 보내도록 수정
+        this.addEventListener('show.bs.modal', () => {
+            const bno = this.getAttribute('board.bno');
+            fetch('/api/readBoard', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(bno) // bno를 요청 바디에 포함
+            })
+                .then(response => response.text())
+                .then(data => {
+                    console.log(data);
+                    // 받은 데이터를 모달에 표시하는 등의 작업 수행
+                    // 모달 내용을 여기에 삽입하는 방법도 있으나, 보통은 모달 내용을 가져온 다음에 삽입
+                })
+                .catch(error => console.error('Error:', error));
+        });
+
+        // 모달을 닫을 때마다 모달 내용 초기화
+        this.addEventListener('hide.bs.modal', () => {
+            // 모달 내용 초기화 작업 수행
+        });
     }
 }
 
