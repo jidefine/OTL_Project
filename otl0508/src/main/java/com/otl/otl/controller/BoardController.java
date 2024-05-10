@@ -1,8 +1,11 @@
 package com.otl.otl.controller;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.otl.otl.domain.Board;
 import com.otl.otl.domain.Member;
+import com.otl.otl.dto.BoardAndMemberDTO;
 import com.otl.otl.dto.BoardDTO;
 import com.otl.otl.dto.MemberDTO;
 import com.otl.otl.repository.MemberRepository;
@@ -17,6 +20,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -55,8 +59,8 @@ public class BoardController {
         }
     }
 
-    @PostMapping("/readBoard")
-    public ResponseEntity<String> readBoard(@Valid @RequestBody Long bno) {
+    @GetMapping("/readBoard")
+    public ResponseEntity<MemberDTO> readBoard(@RequestParam Long bno) throws JsonProcessingException {
         // 게시글 조회 시도 로깅
         log.info("게시글 조회 시도 : {}", bno);
 
@@ -69,23 +73,19 @@ public class BoardController {
 
             MemberDTO memberDTO = new MemberDTO();
             optionalMember.ifPresent(member -> {
-                // 회원 정보 가져와서 MemberDTO에 추가
+                // 닉네임, 프로필이미지 가져와서 MemberDTO에 추가
                 memberDTO.setNickname(member.getNickname());
                 memberDTO.setMemberProfileImage(member.getMemberProfileImage());
             });
 
             // boardDTO와 memberDTO의 정보를 문자열로 조합하여 반환
-            String response = "BoardDTO: " + boardDTO.toString() + ", MemberDTO: " + memberDTO.toString();
+            //String response = "BoardDTO: " + boardDTO.toString() + ", MemberDTO: " + memberDTO.toString();
 
-            // boardDTO와 memberDTO의 정보를 조합하여 응답
-            //BoardAndMemberResponse response = new BoardAndMemberResponse(boardDTO, memberDTO);
-
-            log.info("게시글이 성공적으로 조회되었습니다. 게시글 ID: {}", bno);
-            return ResponseEntity.ok().body(response);
+            log.info("게시글 조회 성공: {}", bno);
+            return ResponseEntity.ok().body(memberDTO);
         } else {
             log.info("게시글 조회 실패: {}", bno);
-            return ResponseEntity.badRequest().body("게시글 조회에 실패했습니다.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
-
 }
