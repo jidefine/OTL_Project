@@ -37,4 +37,8 @@ public class Board extends BaseEntity {
         this.boardTitle = title;
         this.boardContent = content;
     }
+
+    public void isDeleted(boolean isDeleted){
+        this.isDeleted = isDeleted;
+    }
 }

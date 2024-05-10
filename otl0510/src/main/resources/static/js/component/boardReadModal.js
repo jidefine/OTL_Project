@@ -201,35 +201,38 @@ class boardReadModal extends HTMLElement {
 
         // 3: 게시글 삭제
         // 삭제하기 버튼 클릭 시
-        // const boardDeleteBtn = this.querySelector("#boardDeleteBtn");
-        // boardDeleteBtn.addEventListener("click", () => {
-        //     // 사용자에게 확인 메시지 표시
-        //     if (confirm("정말로 삭제하시겠습니까?")) {
-        //
-        //         // 확인 버튼을 눌렀을 때
-        //         // AJAX를 통해 게시글을 서버에서 삭제
-        //         $.ajax({
-        //             type: 'POST',
-        //             url: '/api/deletedBoard',
-        //             data: {
-        //                 bno: bno
-        //             },
-        //             success: function (response) {
-        //                 // 서버에서 받은 응답을 처리하는 부분
-        //                 console.log("게시글이 성공적으로 삭제되었습니다.");
-        //                 // 모달 닫기
-        //                 $("#boardReadModal-" + bno).modal("hide");
-        //             },
-        //             error: function (xhr, status, error) {
-        //                 console.error("게시글 삭제 중 에러가 발생했습니다: ", error);
-        //                 // 에러 처리 부분
-        //             }
-        //         });
-        //     } else {
-        //         // 취소 버튼을 눌렀을 때
-        //         alert("삭제가 취소되었습니다.");
-        //     }
-        // });
+        const boardDeleteBtn = this.querySelector("#boardDeleteBtn");
+        boardDeleteBtn.addEventListener("click", () => {
+
+            const deleteBno= this.querySelector("#boardHeader");
+
+            // 사용자에게 확인 메시지 표시
+            const confirmDelete = confirm("정말로 삭제하시겠습니까?");
+
+            console.log("게시글이 삭제될 예정입니다.");
+
+            if (confirmDelete) {
+
+                // 확인 버튼을 눌렀을 때
+                // AJAX를 통해 게시글을 서버에서 삭제
+                $.ajax({
+                    type: 'POST',
+                    url: '/api/deleteBoard',
+                    data: { "bno": deleteBno }, // 단순히 게시글 번호만 전달
+                    success: function (response) {
+                        // 성공적으로 삭제되었을 때의 처리
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("게시글 삭제 중 에러가 발생했습니다: ", error);
+                        console.error("상태 코드: ", status);
+                        console.error("XHR 객체: ", xhr);
+                    }
+                });
+            } else {
+                // 취소 버튼을 눌렀을 때
+                alert("삭제가 취소되었습니다.");
+            }
+        });
 
 
         // 4. 취소 버튼 클릭 시
