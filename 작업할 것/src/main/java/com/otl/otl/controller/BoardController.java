@@ -1,0 +1,140 @@
+package com.otl.otl.controller;
+
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.otl.otl.domain.Board;
+import com.otl.otl.domain.Member;
+import com.otl.otl.dto.BoardDTO;
+import com.otl.otl.dto.MemberDTO;
+import com.otl.otl.repository.MemberRepository;
+import com.otl.otl.service.BoardService;
+import jakarta.validation.Valid;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.ui.Model;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
+import java.util.Optional;
+
+@RestController
+@RequestMapping("/api")
+@Validated // DTO 유효성 검사를 위한 어노테이션
+@Log4j2
+public class BoardController {
+
+    private final BoardService boardService;
+
+    @Autowired
+    private MemberRepository memberRepository;
+
+    @Autowired
+    public BoardController(BoardService boardService) {
+        this.boardService = boardService;
+    }
+
+
+    // POST 요청을 처리하는 메소드, 게시글 저장
+    @PostMapping("/saveBoard")
+    public ResponseEntity<String> saveBoard(@Valid @RequestBody BoardDTO boardDTO) {
+        // BoardService를 사용하여 게시글을 저장하고, 성공 여부를 확인합니다.
+        // 게시글 저장 시도 로깅
+        log.info("게시글 저장 시도 : {}", boardDTO);
+
+        Long bno = boardService.register(boardDTO);
+
+        // 저장 결과에 따라 적절한 응답을 반환합니다.
+        if (bno != null) {
+            log.info("게시글이 성공적으로 저장되었습니다. 게시글 ID: {}", bno);
+            return ResponseEntity.status(HttpStatus.CREATED).body("게시글이 성공적으로 등록되었습니다.");
+        } else {
+            log.info("게시글 저장 실패: {}", boardDTO);
+            return ResponseEntity.badRequest().body("게시글 등록에 실패했습니다.");
+        }
+    }
+
+    @GetMapping("/readBoard")
+    public ResponseEntity<MemberDTO> readBoard(@RequestParam Long bno) throws JsonProcessingException {
+        // 게시글 조회 시도 로깅
+        log.info("게시글 조회 시도 : {}", bno);
+
+        BoardDTO boardDTO = boardService.readOne(bno);
+
+        // 저장 결과에 따라 적절한 응답을 반환합니다.
+        if (boardDTO != null) {
+            // 이메일 주소로 회원 조회
+            Optional<Member> optionalMember = memberRepository.findByEmail(boardDTO.getEmail());
+
+            MemberDTO memberDTO = new MemberDTO();
+            optionalMember.ifPresent(member -> {
+                // 닉네임, 프로필이미지 가져와서 MemberDTO에 추가
+                memberDTO.setNickname(member.getNickname());
+                memberDTO.setMemberProfileImage(member.getMemberProfileImage());
+            });
+
+            // boardDTO와 memberDTO의 정보를 문자열로 조합하여 반환
+            //String response = "BoardDTO: " + boardDTO.toString() + ", MemberDTO: " + memberDTO.toString();
+
+            log.info("게시글 조회 성공: {}", bno);
+            return ResponseEntity.ok().body(memberDTO);
+        } else {
+            log.info("게시글 조회 실패: {}", bno);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
+
+    @PostMapping("/modifiedBoard")
+    public ResponseEntity<BoardDTO> modifyBoard(@Valid @RequestBody BoardDTO modifiedBoardDTO) {
+        // 클라이언트에서 보낸 수정된 데이터가 modifiedBoardDTO에 담겨있음
+
+        // 게시글 수정 시도 로깅
+        log.info("게시글 수정 시도 : {}", modifiedBoardDTO.getBno());
+
+        // 사용자의 이메일 가져오기
+        String loggedInEmail = null;
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated()) {
+            Object principal = authentication.getPrincipal();
+            if (principal instanceof OAuth2User) {
+                OAuth2User oauthUser = (OAuth2User) principal;
+                Map<String, Object> kakaoAccount = oauthUser.getAttribute("kakao_account");
+                loggedInEmail = (String) kakaoAccount.get("email");
+            }
+        }
+
+        if (loggedInEmail == null) {
+            log.info("사용자가 로그인하지 않았습니다.");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+
+        // 게시글을 작성한 회원의 이메일 주소 확인
+        BoardDTO existingBoardDTO = boardService.readOne(modifiedBoardDTO.getBno());
+
+        if (existingBoardDTO == null) {
+            log.info("해당 게시글을 찾을 수 없습니다.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+
+        if (!loggedInEmail.equals(existingBoardDTO.getEmail())) {
+            log.info("게시글 작성자와 일치하지 않습니다.");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        }
+
+        // 회원이 존재할 때만 수정
+        modifiedBoardDTO.setBoardContent("Updated content 2..."); // 예시로 내용 변경
+        Board result = boardService.modify(modifiedBoardDTO);
+
+        log.info("게시글이 성공적으로 수정되었습니다. 게시글 ID: {}", result.getBno());
+
+        // 수정된 데이터를 클라이언트에게 반환
+        return ResponseEntity.ok().body(modifiedBoardDTO);
+    }
+}
