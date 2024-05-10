@@ -91,50 +91,18 @@ public class BoardController {
         }
     }
 
-    @PostMapping("/modifiedBoard")
-    public ResponseEntity<BoardDTO> modifyBoard(@Valid @RequestBody BoardDTO modifiedBoardDTO) {
-        // 클라이언트에서 보낸 수정된 데이터가 modifiedBoardDTO에 담겨있음
+    @PostMapping("/modifyBoard")
+    public ResponseEntity<BoardDTO> modifyBoard(@Valid @RequestBody BoardDTO boardDTO) {
+        // 클라이언트에서 보낸 수정된 데이터가 boardDTO에 담겨있음
 
         // 게시글 수정 시도 로깅
-        log.info("게시글 수정 시도 : {}", modifiedBoardDTO.getBno());
+        log.info("게시글 수정 시도 : {}", boardDTO.getBno());
 
-        // 사용자의 이메일 가져오기
-        String loggedInEmail = null;
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.isAuthenticated()) {
-            Object principal = authentication.getPrincipal();
-            if (principal instanceof OAuth2User) {
-                OAuth2User oauthUser = (OAuth2User) principal;
-                Map<String, Object> kakaoAccount = oauthUser.getAttribute("kakao_account");
-                loggedInEmail = (String) kakaoAccount.get("email");
-            }
-        }
-
-        if (loggedInEmail == null) {
-            log.info("사용자가 로그인하지 않았습니다.");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-        }
-
-        // 게시글을 작성한 회원의 이메일 주소 확인
-        BoardDTO existingBoardDTO = boardService.readOne(modifiedBoardDTO.getBno());
-
-        if (existingBoardDTO == null) {
-            log.info("해당 게시글을 찾을 수 없습니다.");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        }
-
-        if (!loggedInEmail.equals(existingBoardDTO.getEmail())) {
-            log.info("게시글 작성자와 일치하지 않습니다.");
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
-        }
-
-        // 회원이 존재할 때만 수정
-        modifiedBoardDTO.setBoardContent("Updated content 2..."); // 예시로 내용 변경
-        Board result = boardService.modify(modifiedBoardDTO);
+        Board result = boardService.modify(boardDTO);
 
         log.info("게시글이 성공적으로 수정되었습니다. 게시글 ID: {}", result.getBno());
 
         // 수정된 데이터를 클라이언트에게 반환
-        return ResponseEntity.ok().body(modifiedBoardDTO);
+        return ResponseEntity.ok().body(boardDTO);
     }
 }

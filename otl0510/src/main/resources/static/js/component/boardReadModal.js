@@ -1,3 +1,6 @@
+// 제목과 내용을 저장할 변수 선언
+let originalTitle, originalContent;
+
 class boardReadModal extends HTMLElement {
     /** - 작성자 : 유지오
      *
@@ -21,6 +24,10 @@ class boardReadModal extends HTMLElement {
         // console.log('MemberProfileImage');
         // console.log('regDate');
         // console.log('modDate');
+
+        // 현재 제목과 내용을 저장
+        originalTitle = boardTitle;
+        originalContent = boardContent;
 
         this.innerHTML = `
             <!-- The Modal -->
@@ -79,7 +86,7 @@ class boardReadModal extends HTMLElement {
                                     <button id="boardModifyBtn" type="button" class="btn btn-success">수정하기</button>
                                     <button id="boardModifyFinishBtn" type="button" class="btn btn-primary" style="display: none;">저장하기</button>
                                     <button id="boardDeleteBtn" type="button" class="btn btn-danger" style="display: none;">삭제하기</button>
-                                    <button type="button" class="btn btn-danger" data-dismiss="modal">취소</button>
+                                    <button id="boardCancelBtn" type="button" class="btn btn-danger" data-dismiss="modal">취소</button>
                                 </div>
                         </div>
                     </div>
@@ -116,43 +123,53 @@ class boardReadModal extends HTMLElement {
 
 
         // 2 : 게시글 수정
-        // 수정하기 버튼 클릭 시
+        // id로 필요한 데이터, 버튼 가져오기
         const modifyBtn = this.querySelector("#boardModifyBtn");
         const boardTitleInput = this.querySelector("#boardTitle");
         const boardContentTextarea = this.querySelector("#boardContent");
         const modifyFinishBtn = this.querySelector("#boardModifyFinishBtn");
         const deleteBtn = this.querySelector("#boardDeleteBtn");
+        const cancelBtn = this.querySelector("#boardCancelBtn");
 
+        // 수정하기 버튼 클릭 시
         modifyBtn.addEventListener("click", () => {
-            // 제목과 내용 입력란의 readOnly 속성 제거
-            boardTitleInput.removeAttribute("readonly");
-            boardContentTextarea.removeAttribute("readonly");
 
-            // 수정하기 버튼 비활성화
-            modifyBtn.style.display = "none";
+            const boardemail = this.getAttribute('board.email'); // 게시글 작성자
+            const email = this.getAttribute('data-email'); // 로그인한 사용자
 
-            // 저장하기 버튼과 삭제하기 버튼 보이게 설정
-            modifyFinishBtn.style.display = "inline-block";
-            deleteBtn.style.display = "inline-block";
+            if(boardemail !== email){
+                alert("게시글 작성자와 일치하지 않습니다.");
+            } else {
+                // 제목과 내용 입력란의 readOnly 속성 제거
+                boardTitleInput.removeAttribute("readonly");
+                boardContentTextarea.removeAttribute("readonly");
+
+                // 수정하기 버튼 비활성화
+                modifyBtn.style.display = "none";
+
+                // 저장하기 버튼과 삭제하기 버튼 보이게 설정
+                modifyFinishBtn.style.display = "inline-block";
+                deleteBtn.style.display = "inline-block";
+            }
         });
 
         // 저장하기 버튼 클릭 시
         const boardModifyFinishBtn = this.querySelector("#boardModifyFinishBtn");
         boardModifyFinishBtn.addEventListener("click", (event) => {
             event.preventDefault(); // 폼의 기본 제출을 방지
-            const modifiedTitle = document.getElementById("boardTitle").value;
-            const modifiedContent = document.getElementById("boardContent").value;
+            const modifiedTitle = boardTitleInput.value; // 기존 boardTitle 값 불러오기
+            const modifiedContent = boardContentTextarea.value; // 기존 boardContent 값 불러오기
 
             // 수정된 데이터를 객체에 담기
-            const modifiedData = {
+            const modifyData = {
                 bno: bno,
                 boardTitle: modifiedTitle,
                 boardContent: modifiedContent
             };
 
-            console.log("수정 데이터: ", modifiedData); // 수정 데이터 확인
+            console.log("수정 데이터: ", modifyData); // 수정 데이터 확인
 
-            if (modifiedData.boardTitle === '' || modifiedData.boardContent === '') {
+            if (modifyData.boardTitle === '' || modifyData.boardContent === '') {
                 alert("제목과 내용을 입력해주세요.");
             } else {
                 // AJAX를 통해 수정 내용을 서버로 전송
@@ -160,7 +177,7 @@ class boardReadModal extends HTMLElement {
                     type: 'POST', // 수정된 내용을 서버로 전송하는 POST 요청
                     url: '/api/modifyBoard',
                     contentType: 'application/json',
-                    data: JSON.stringify(modifiedData), // 객체를 JSON 문자열로 변환하여 전송
+                    data: JSON.stringify(modifyData), // 객체를 JSON 문자열로 변환하여 전송
                     success: function (response) {
                         // 서버에서 받은 응답을 처리하는 부분
                         console.log("수정 내용이 성공적으로 저장되었습니다.");
@@ -193,7 +210,7 @@ class boardReadModal extends HTMLElement {
         //         // AJAX를 통해 게시글을 서버에서 삭제
         //         $.ajax({
         //             type: 'POST',
-        //             url: '/api/DeleteBoard',
+        //             url: '/api/deletedBoard',
         //             data: {
         //                 bno: bno
         //             },
@@ -214,6 +231,24 @@ class boardReadModal extends HTMLElement {
         //     }
         // });
 
+
+        // 4. 취소 버튼 클릭 시
+        cancelBtn.addEventListener("click", () => {
+            // 수정하기 버튼 활성화
+            modifyBtn.style.display = "inline-block";
+
+            // 저장하기 버튼과 삭제하기 버튼 숨기기
+            modifyFinishBtn.style.display = "none";
+            deleteBtn.style.display = "none";
+
+            // 제목과 내용 입력란의 readOnly 속성 다시 설정
+            boardTitleInput.setAttribute("readonly", true);
+            boardContentTextarea.setAttribute("readonly", true);
+
+            // 제목과 내용 원래 값으로 되돌리기 (수정 전 값으로)
+            boardTitleInput.value = originalTitle;
+            boardContentTextarea.value = originalContent;
+        });
 
         // 2 : 게시글 수정 모달창로 화면 전환
         // const modalContent = this; // 모달 요소 자체에 이벤트를 붙여야 함
