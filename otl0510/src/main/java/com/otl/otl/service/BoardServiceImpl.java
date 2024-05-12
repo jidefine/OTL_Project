@@ -16,6 +16,7 @@ import com.otl.otl.dto.BoardDTO;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
+import java.util.List;
 
 @Service
 @Log4j2
@@ -60,7 +61,13 @@ public class BoardServiceImpl implements BoardService{
         log.info("게시글 목록 조회: 페이지 번호 {}, 페이지 크기 {}", page, size);
 
         PageRequest pageRequest = PageRequest.of(page, size);
-        Page<Board> boardPage = boardRepository.findAllByOrderByModDateDesc(pageRequest);
+        Page<Board> boardPage = boardRepository.findByIsDeletedFalseOrderByModDateDesc(pageRequest);
+
+        // 페이지에 대한 로그 출력
+        List<Board> boards = boardPage.getContent();
+        for (Board board : boards) {
+            log.info("게시글 ID: {}, 제목: {}, 작성일: {}, 삭제 여부: {}", board.getBno(), board.getBoardTitle(), board.getModDate(), board.isDeleted());
+        }
 
         return boardPage.map(this::entityToDto);
     }

@@ -204,7 +204,10 @@ class boardReadModal extends HTMLElement {
         const boardDeleteBtn = this.querySelector("#boardDeleteBtn");
         boardDeleteBtn.addEventListener("click", () => {
 
-            const deleteBno= this.querySelector("#boardHeader");
+            // 삭제할 데이터를 객체에 담기
+            const deleteData = {
+                bno: bno
+            };
 
             // 사용자에게 확인 메시지 표시
             const confirmDelete = confirm("정말로 삭제하시겠습니까?");
@@ -218,9 +221,10 @@ class boardReadModal extends HTMLElement {
                 $.ajax({
                     type: 'POST',
                     url: '/api/deleteBoard',
-                    data: { "bno": deleteBno }, // 단순히 게시글 번호만 전달
+                    contentType: 'application/json', // 데이터 형식을 JSON으로 설정
+                    data: JSON.stringify(deleteData), // JSON 형식으로 데이터 전송
                     success: function (response) {
-                        // 성공적으로 삭제되었을 때의 처리
+                        alert("삭제가 완료되었습니다.");
                     },
                     error: function (xhr, status, error) {
                         console.error("게시글 삭제 중 에러가 발생했습니다: ", error);
