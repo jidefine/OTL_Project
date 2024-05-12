@@ -5,6 +5,7 @@ import com.otl.otl.dto.BoardDTO;
 import com.otl.otl.domain.Member;
 import com.otl.otl.domain.Reply;
 import com.otl.otl.dto.ReplyDTO;
+import com.otl.otl.repository.BoardRepository;
 import com.otl.otl.repository.MemberRepository;
 import com.otl.otl.repository.ReplyRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,41 +21,49 @@ import java.util.Optional;
 @Log4j2
 public class ReplyServiceImpl implements ReplyService{
 
-    private final BoardDTO boardDTO;
-
+    private final BoardRepository boardRepository;
     private  final MemberRepository memberRepository;
-
     private final ReplyRepository replyRepository;
-
     private final ModelMapper modelMapper;
     @Override
     public Long register(ReplyDTO replyDTO) {
-        Optional<Member> optionalMember = memberRepository.findByEmail(boardDTO.getEmail());
-        Member member = optionalMember.orElse(null); // Optional이 비어있으면 null을 반환
-        if (member == null) {
-            // 해당 이메일로 등록된 회원이 없으면 게시글 등록에 실패합니다.
-            log.error("회원 등록 실패: 이메일 {} 에 해당하는 회원이 없습니다.", boardDTO.getEmail());
-            return null;
-        }
+        // 회원 이메일로 Member 엔티티를 조회합니다.
+        Optional<Member> optionalMember = memberRepository.findByEmail(replyDTO.getEmail());
+        Member member = optionalMember.orElseThrow(() -> new IllegalArgumentException("해당 이메일의 회원이 존재하지 않습니다: " + replyDTO.getEmail()));
 
-        // BoardDTO를 Board 엔티티로 변환
-        Board board = Board.builder()
-                .boardTitle(boardDTO.getBoardTitle())
-                .boardContent(boardDTO.getBoardContent())
+        // 게시글 번호로 Board 엔티티를 조회합니다.
+        Optional<Board> optionalBoard = boardRepository.findById(replyDTO.getBno());
+        Board board = optionalBoard.orElseThrow(() -> new IllegalArgumentException("해당 번호의 게시글이 존재하지 않습니다: " + replyDTO.getBno()));
+
+        // ReplyDTO를 Reply 엔티티로 변환
+        Reply reply = Reply.builder()
+                .replyContent(replyDTO.getReplyContent())
+                .board(board)
                 .member(member)
-                .isDeleted(false) // 초기값 설정
+                //.isDeleted(false)
                 .build();
 
         // 생성된 Board 객체를 저장하고, 저장된 게시글의 ID를 반환합니다.
-        Board savedBoard = boardRepository.save(board);
-        log.info("새로운 게시글이 등록되었습니다: 게시글 ID {}", savedBoard.getBno());
-        return savedBoard.getBno();
-        return null;
+        Reply savedReply = replyRepository.save(reply);
+        log.info("새로운 게시글이 등록되었습니다: 게시글 ID {}", savedReply.getReplyNo());
+        return savedReply.getReplyNo();
     }
 
     @Override
-    public ReplyDTO readOne(Long bno) {
-        return null;
+    public ReplyDTO readOne(Long replyNo) {
+        Optional<Reply> result = replyRepository.findById(replyNo);
+
+        Reply reply = result.orElseThrow();
+
+        //댓글 엔티티에서 게시물 번호를 가져옴
+        Long bno = reply.getBoard().getBno();
+
+        ReplyDTO replyDTO = modelMapper.map(reply, ReplyDTO.class);
+
+        // ReplyDTO에 게시물 번호를 설정
+        replyDTO.setBno(bno);
+
+        return replyDTO;
     }
 
     @Override
@@ -63,7 +72,7 @@ public class ReplyServiceImpl implements ReplyService{
     }
 
     @Override
-    public void remove(Long bno) {
+    public void remove(Long replyNo) {
 
     }
 

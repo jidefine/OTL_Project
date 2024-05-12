@@ -27,7 +27,7 @@ public class Reply extends BaseEntity {
 
 
     @ManyToOne
-    @JoinColumn(name = "email", referencedColumnName = "email")
+    @JoinColumn(name = "email", referencedColumnName = "email", nullable = false)
     private Member member;          // 댓글 작성자
 
 //    public void changeText(String text){
