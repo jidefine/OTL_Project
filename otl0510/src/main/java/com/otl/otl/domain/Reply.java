@@ -4,11 +4,14 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
+@Table(name = "Reply", indexes = {
+        @Index(name = "idx_reply_board_bno", columnList = "board_bno")
+})
 @Getter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
+@ToString(exclude = "board")
 public class Reply extends BaseEntity {
 
     @Id
@@ -26,4 +29,9 @@ public class Reply extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "email", referencedColumnName = "email")
     private Member member;          // 댓글 작성자
+
+//    public void changeText(String text){
+//        this.replyText = text;
+//    }
+
 }
