@@ -49,35 +49,20 @@ public class ReplyServiceImpl implements ReplyService{
         return savedReply.getReplyNo();
     }
 
-    @Override
+     @Override
     public ReplyDTO readOne(Long replyNo) {
         Optional<Reply> result = replyRepository.findById(replyNo);
 
         Reply reply = result.orElseThrow();
 
-        //댓글 엔티티에서 게시물 번호를 가져옴
-        Long bno = reply.getBoard().getBno();
-
         ReplyDTO replyDTO = modelMapper.map(reply, ReplyDTO.class);
-
-        // ReplyDTO에 게시물 번호를 설정
-        replyDTO.setBno(bno);
 
         return replyDTO;
     }
 
     @Override
-    public Reply modify(ReplyDTO replyDTO) {
-        return null;
-    }
-
-    @Override
     public void remove(Long replyNo) {
-
-    }
-
-    @Override
-    public Page<ReplyDTO> findReplys(int page, int size) {
-        return null;
+        Optional<Reply> result = replyRepository.findById(replyNo);
+        result.ifPresent(reply -> replyRepository.delete(reply)); // 삭제 처리
     }
 }

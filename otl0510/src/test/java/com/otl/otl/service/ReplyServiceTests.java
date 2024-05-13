@@ -38,21 +38,20 @@ public class ReplyServiceTests {
     @Test
     public void testRead(){
 
-        // 테스트를 위한 댓글 번호 지정
-        Long replyNo = 3L;
-
         // 댓글 조회
-        ReplyDTO replyDTO = replyService.readOne(replyNo);
-        Optional<Member> optionalMember = memberRepository.findByEmail(replyDTO.getEmail());
+        ReplyDTO replyDTO = replyService.readOne(3L);
 
-        MemberDTO memberDTO = new MemberDTO();
-        optionalMember.ifPresent(member -> {
-            // 회원 정보를 MemberDTO에 추가합니다.
-            memberDTO.setNickname(member.getNickname());
-            memberDTO.setMemberProfileImage(member.getMemberProfileImage());
-        });
+        log.info(replyDTO);
+    }
 
-        // 댓글과 회원 정보를 합쳐서 로그에 출력합니다.
-        log.info(replyDTO + memberDTO.toString());
+    @Test
+    public void testDelete(){
+
+        // 댓글 삭제
+        replyService.remove(3L);
+
+        Optional<Reply> deletedReply = replyRepository.findById(3L);
+        deletedReply.ifPresent(reply -> log.info("댓글 삭제 중 에러가 발생했습니다."));
+
     }
 }
