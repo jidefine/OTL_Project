@@ -8,8 +8,7 @@ public interface ReplyService {
 
     Long register(ReplyDTO replyDTO); // 등록
     ReplyDTO readOne(Long replyNo); // 조회
-    Reply modify(ReplyDTO replyDTO); // 수정
     void remove(Long replyNo); // 삭제
 
-    Page<ReplyDTO> findReplys(int page, int size);
+    //Page<ReplyDTO> findReplys(int page, int size);
 }
