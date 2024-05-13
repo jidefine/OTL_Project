@@ -1,9 +1,9 @@
 package com.otl.otl.service;
 
 import com.otl.otl.domain.Board;
-import com.otl.otl.dto.BoardDTO;
 import com.otl.otl.domain.Member;
 import com.otl.otl.domain.Reply;
+import com.otl.otl.dto.BoardDTO;
 import com.otl.otl.dto.ReplyDTO;
 import com.otl.otl.repository.BoardRepository;
 import com.otl.otl.repository.MemberRepository;
@@ -12,26 +12,34 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 @Log4j2
+@RequiredArgsConstructor
+@Transactional
 public class ReplyServiceImpl implements ReplyService{
 
     private final BoardRepository boardRepository;
-    private  final MemberRepository memberRepository;
+    private final MemberRepository memberRepository;
     private final ReplyRepository replyRepository;
+    private final MemberService memberService;
     private final ModelMapper modelMapper;
     @Override
     public Long register(ReplyDTO replyDTO) {
-        // 회원 이메일로 Member 엔티티를 조회합니다.
+        // 회원 이메일로 Member 엔티티 조회
         Optional<Member> optionalMember = memberRepository.findByEmail(replyDTO.getEmail());
         Member member = optionalMember.orElseThrow(() -> new IllegalArgumentException("해당 이메일의 회원이 존재하지 않습니다: " + replyDTO.getEmail()));
 
-        // 게시글 번호로 Board 엔티티를 조회합니다.
+        // 게시글 번호로 Board 엔티티 조회
         Optional<Board> optionalBoard = boardRepository.findById(replyDTO.getBno());
         Board board = optionalBoard.orElseThrow(() -> new IllegalArgumentException("해당 번호의 게시글이 존재하지 않습니다: " + replyDTO.getBno()));
 
@@ -49,7 +57,7 @@ public class ReplyServiceImpl implements ReplyService{
         return savedReply.getReplyNo();
     }
 
-     @Override
+    @Override
     public ReplyDTO readOne(Long replyNo) {
         Optional<Reply> result = replyRepository.findById(replyNo);
 
@@ -65,4 +73,25 @@ public class ReplyServiceImpl implements ReplyService{
         Optional<Reply> result = replyRepository.findById(replyNo);
         result.ifPresent(reply -> replyRepository.delete(reply)); // 삭제 처리
     }
+
+    @Override
+    public Page<ReplyDTO> findReplyies(int page, int size) {
+        log.info("댓글 목록 조회: 페이지 번호 {}, 페이지 크기 {}", page, size);
+
+        // 댓글 조회
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "modDate"));
+        Page<Reply> replyPage = replyRepository.findAll(pageRequest);
+        return replyPage.map(this::entityToDto);
+    }
+
+    // Reply 엔티티를 ReplyDTO로 변환하는 메서드
+    private ReplyDTO entityToDto(Reply reply) {
+        String email = reply.getMember() != null ? reply.getMember().getEmail() : null;
+        String nickname = reply.getMember() != null ? reply.getMember().getNickname() : null;
+        return ReplyDTO.builder()
+                .replyContent(reply.getReplyContent()) // 내용
+                .email(email) // 회원 이메일 처리
+                .build();
+    }
+
 }

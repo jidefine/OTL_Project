@@ -1,6 +1,9 @@
 // 제목과 내용을 저장할 변수 선언
 let originalTitle, originalContent;
 
+// 댓글 목록을 저장할 배열
+let replyList = [];
+
 class boardReadModal extends HTMLElement {
     /** - 작성자 : 유지오
      *
@@ -88,6 +91,30 @@ class boardReadModal extends HTMLElement {
                                     <button id="boardDeleteBtn" type="button" class="btn btn-danger" style="display: none;">삭제하기</button>
                                     <button id="boardCancelBtn" type="button" class="btn btn-danger" data-dismiss="modal">취소</button>
                                 </div>
+                                <!-- 댓글 -->
+                                <div class="modal-footer2">
+                                        <div class="row mt-3">
+                                            <!-- 댓글 리스트가 들어가는 곳 -->
+                                            <div class="col-sm-13">
+                                                <ul class="list-group replyList">
+                                           
+                                                </ul>
+                                            </div>
+                                            <!-- 댓글 작성 칸 -->
+                                            <form id="replyForm" action="/api/saveReply" method="POST">
+                                                <div class="col-sm-13 d-flex align-items-start">
+                                                    <input id="replyContent" type="text" class="form-control mr-2" placeholder="댓글을 입력하세요">
+                                                    <button type="submit" id="replysubmitBtn" class="col-sm-2 btn btn-primary">댓글 작성</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    <div class="row mt-3">
+                                        <div class="col">
+                                            <ul class="pagination replyPaging">
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
                         </div>
                     </div>
                 </div>
@@ -131,11 +158,12 @@ class boardReadModal extends HTMLElement {
         const deleteBtn = this.querySelector("#boardDeleteBtn");
         const cancelBtn = this.querySelector("#boardCancelBtn");
 
+        const email = this.getAttribute('data-email'); // 로그인한 사용자
+
         // 수정하기 버튼 클릭 시
         modifyBtn.addEventListener("click", () => {
 
             const boardemail = this.getAttribute('board.email'); // 게시글 작성자
-            const email = this.getAttribute('data-email'); // 로그인한 사용자
 
             if(boardemail !== email){
                 alert("게시글 작성자와 일치하지 않습니다.");
@@ -181,15 +209,7 @@ class boardReadModal extends HTMLElement {
                     success: function (response) {
                         // 서버에서 받은 응답을 처리하는 부분
                         console.log("수정 내용이 성공적으로 저장되었습니다.");
-
-                        // 게시글 입력 필드를 다시 readonly로 변경
-                        document.getElementById("boardTitle").readOnly = true;
-                        document.getElementById("boardContent").readOnly = true;
-
-                        // 저장하기 버튼과 삭제하기 버튼 숨기기
-                        document.getElementById("boardModifyBtn").style.display = "inline-block";
-                        boardModifyFinishBtn.style.display = "none";
-                        document.getElementById("boardDeleteBtn").style.display = "none";
+                        location.reload();
                     },
                     error: function (xhr, status, error) {
                         console.error("수정 내용을 저장하는데 실패했습니다: ", error);
@@ -225,6 +245,7 @@ class boardReadModal extends HTMLElement {
                     data: JSON.stringify(deleteData), // JSON 형식으로 데이터 전송
                     success: function (response) {
                         alert("삭제가 완료되었습니다.");
+                        location.reload();
                     },
                     error: function (xhr, status, error) {
                         console.error("게시글 삭제 중 에러가 발생했습니다: ", error);
@@ -257,35 +278,95 @@ class boardReadModal extends HTMLElement {
             boardContentTextarea.value = originalContent;
         });
 
-        // 2 : 게시글 수정 모달창로 화면 전환
-        // const modalContent = this; // 모달 요소 자체에 이벤트를 붙여야 함
-        //
-        // // 수정하기 버튼 클릭 시
-        // modalContent.querySelector('#boardModifyBtn').addEventListener('click', function () {
-        //     console.log("수정 버튼이 클릭되었습니다.");
-        //
-        //     const bno = modalContent.getAttribute('board.bno'); // 게시글 번호 확인
-        //
-        //     // 현재 열려 있는 조회 모달을 닫음
-        //     $('#boardReadModal-' + bno).modal('hide');
-        //
-        //     // 게시글 정보를 수정 모달에 전달
-        //     const modifyModal = document.querySelector('custom-board-modify-modal');
-        //     modifyModal.setAttribute('board-bno', bno); // 게시글 번호
-        //     modifyModal.setAttribute('board-boardTitle', boardTitle); // 제목
-        //     modifyModal.setAttribute('board-boardContent', boardContent); // 내용
-        //     modifyModal.setAttribute('board-nickname', nickname); // 작성자
-        //     modifyModal.setAttribute('board-memberProfileImage', memberProfileImage); // 작성자 프로필 이미지
-        //     modifyModal.setAttribute('board-regDate', regDate); // 작성일
-        //     modifyModal.setAttribute('board-modDate', modDate); // 수정일
-        //
-        //     console.log("수정할 게시글 번호:", bno);
-        //     console.log("수정 모달 ID:", '#boardModifyModal-' + bno); // 모달 ID 확인
-        //
-        //     // 게시글 수정 모달창 open
-        //     $('#boardModifyModal-' + bno).modal('show');
-        //     console.log("게시글 수정 모달창 open되었습니다.");
-        // });
+        // 5. 댓글 작성
+        const reply = this.querySelector("#replyForm");
+        const reply_Content = document.querySelector("#replyContent");
+
+        reply.addEventListener('submit', (event) => {
+            event.preventDefault(); // 폼의 기본 제출을 방지
+            if(reply_Content.value === ''){
+                alert("댓글 내용을 입력해주세요.")
+            }else{
+                // 댓글로 등록할 데이터를 객체에 담기
+                const replyData = {
+                    bno: bno,
+                    replyContent: reply.querySelector("#replyContent").value,
+                    email: email
+                };
+
+                console.log("폼 데이터: ", replyData); // 폼 데이터 확인
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/api/saveReply',
+                    data: JSON.stringify(replyData),
+                    contentType: 'application/json',
+                    success: function (response) {
+                        console.log("AJAX 요청 성공: ", response); // AJAX 요청 성공 확인
+                        alert('댓글이 성공적으로 저장되었습니다.');
+                        location.reload();
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("AJAX 요청 실패: ", error); // AJAX 요청 실패 확인
+                        alert('댓글 저장에 실패했습니다: ' + error);
+                    }
+                });
+            }
+        });
+
+        // 6. 댓글 목록
+        const replyListElement = this.querySelector(".replyList");
+
+        // 기존의 댓글 목록을 비움
+        replyListElement.innerHTML = '';
+
+        // AJAX를 통해 새로운 댓글 목록을 받아와 화면에 표시
+        $.ajax({
+            type: 'GET',
+            url: '/api/replyList',
+            data: {bno: bno, page: 0, size: 10}, // 서버로 보낼 데이터 (게시물 번호와 페이지 정보)
+            contentType: 'application/json',
+            success: function (response) {
+                console.log("댓글 목록:", response); // 받아온 댓글 목록 출력
+
+                // 받아온 댓글 목록을 화면에 표시하는 코드
+                for (let i = 0; i < response.content.length; i++) {
+                    const reply = response.content[i];
+                    const replyItem = document.createElement("li");
+                    replyItem.classList.add("list-group-item");
+
+                    // // 댓글 내용과 작성자의 닉네임을 함께 표시
+                    // replyItem.textContent = "작성자: " + response.nicknames[i] + " " + reply.replyContent;
+                    //
+                    // replyListElement.appendChild(replyItem);
+
+                    // 새로운 행을 생성
+                    const newRow = document.createElement("tr");
+
+                    // 작성자의 닉네임 열을 추가
+                    const nicknameCell = document.createElement("td");
+                    nicknameCell.textContent = nickname;
+                    nicknameCell.style.color = "#FD7B38";
+                    newRow.appendChild(nicknameCell);
+
+                    // 댓글 내용 열을 추가
+                    const contentCell = document.createElement("td");
+                    contentCell.textContent = reply.replyContent;
+
+                    contentCell.style.width = "90%";
+                    newRow.appendChild(contentCell);
+
+                    // 행을 테이블에 추가
+                    replyListElement.appendChild(newRow);
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error("AJAX 요청 실패: ", error); // AJAX 요청 실패 확인
+                alert('댓글 목록을 불러오는데 실패했습니다: ' + error);
+            }
+        });
+
+        // 7. 댓글 삭제
     }
 }
 
