@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <meta name="description" content=""/>
+    <meta name="author" content=""/>
+
+    <title>대시보드</title>
+
+    <!-- Custom fonts for this template-->
+    <link
+            th:href="@{vendor/fontawesome-free/css/all.min.css}"
+            rel="stylesheet"
+            type="text/css"
+    />
+    <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+            integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+            crossorigin="anonymous"
+    />
+
+    <!-- Custom styles for this template -->
+    <link th:href="@{css/sb-admin-2.min.css}" rel="stylesheet"/>
+
+</head>
+<style>
+    #todolistContainer {
+        right: -100%;
+        z-index: 1;
+        transition: right 0.5s ease-in;
+    }
+    #todolistContainer.show {
+        right: 5%;
+        transition: right 0.5s ease-out;
+    }
+</style>
+<body id="page-top">
+
+<!-- Page Wrapper -->
+<div id="wrapper">
+    <custom-sidebar></custom-sidebar>
+
+    <!-- Content Wrapper -->
+    <div id="content-wrapper" class="d-flex flex-column">
+        <!-- Main Content -->
+        <div id="content">
+            <!-- TopBar -->
+            <custom-topbar
+                    th:attr="data-nickname=${nickname}, data-profile-image=${memberProfileImage}"></custom-topbar>
+            <!-- TopBar End -->
+            <!-- container fluid -->
+            <div class="container-fluid">
+
+                <div class="row justify-content-center gap-3 h-600 ">
+                    <!-- 캘린더 -->
+                    <div id="calendar"
+                         class="col-lg-8 bg-white p-3 rounded fc fc-media-screen fc-direction-ltr fc-theme-standard"></div>
+                    <!-- 캘린더 end-->
+                    <div class="col-auto">
+                        <button id="todolistPopup" class="btn border btn-facebook shadow-lg p-3 mb-5 ">👈TodoList</button>
+                    </div>
+
+
+                    <div id="todolistContainer" class="row position-absolute col-lg-6 col-md-6 col-sm-3 fade d-none">
+                        <!--                    todoList Start -->
+                        <div class="bg-white shadow-lg rounded" id="todolist">
+                            <div class="row justify-content-center">
+                                <h4 class="h4 p-4 col">TodoList</h4>
+                                <h4 class="h4 p-4 col-auto">
+                                    <button type="button" id="todolistExit" class="btn btn-danger col-auto">X</button>
+                                </h4>
+                            </div>
+                            <form>
+                                <label class="row justify-content-between gap-3 m-2">
+                                    <input class="col col-form-label form-control" type="text"
+                                           placeholder="할 일 입력" name="todoTitle" id="todoTitle">
+                                    <button class="btn btn-facebook col-auto" onclick="submitTodo(e)">+</button>
+                                </label>
+                                <label class="row justify-content-center gap-5">
+                                    <input type="date" class="col-lg-4 col-sm-3 col-md-3  form-control input-group"
+                                           name="startDate" id="startDate">~
+                                    <input type="date" class="col-lg-4 col-sm-3 col-md-3 form-control input-group"
+                                           name="endDate" id="endDate">
+                                </label>
+                                <hr class="border border-dark">
+                            </form>
+                            <ul class="list-group" id="todoListUl">
+                            </ul>
+                        </div>
+                    </div>
+                    <script>
+                        //timeout many click Exception
+                        let todolistPopupTimeout, todolistExitTimeout;
+
+                        document.getElementById("todolistPopup").addEventListener("click", () => {
+                            const todolistContainer = document.getElementById("todolistContainer");
+                            clearTimeout(todolistExitTimeout);
+                            todolistContainer.classList.remove("fade","d-none");
+                            todolistPopupTimeout = setTimeout(()=>{
+                                todolistContainer.classList.add("show");
+                            },0);
+                        });
+                        document.getElementById("todolistExit").addEventListener("click", () => {
+                            const todolistContainer = document.getElementById("todolistContainer");
+                            clearTimeout(todolistPopupTimeout);
+                            todolistExitTimeout = setTimeout(()=>{
+                                todolistContainer.classList.remove("show");
+                            },0);
+                            todolistExitTimeout = setTimeout(()=>{
+                                todolistContainer.classList.add("fade","d-none");
+                            },600);
+
+
+                        });
+
+                    </script>
+                </div>
+                <script th:inline="javascript"> //todolist script
+                // const email = "[[${email}]]";
+                let email = `[[${email}]]`;
+                let cTodos = [];
+                email = email.replace(/"/g, '');
+
+                document.addEventListener("DOMContentLoaded", () => {
+                    fetchAllTodos();
+                });
+
+                // todo button onclick Event
+                function submitTodo(e) {
+                    alert("할 일 리스트에 업로드 되었습니다.");
+                    e.preventDefault(); //새로고침 방지
+                    const todoTitle = document.getElementById("todoTitle").value;
+                    const startDate = document.getElementById("startDate").value;
+                    const endDate = document.getElementById("endDate").value;
+
+
+                    fetch('/api/todolists', {
+                        method: 'POST',
+                        headers: {'Content-Type': "application/json"},
+                        body: JSON.stringify({
+                            todolistContent: todoTitle,
+                            todoStartDate: startDate,
+                            todoEndDate: endDate,
+                            memberEmail: email
+
+                        })
+                    })
+                        .then(response => response.json())// json형식으로 응답 받음
+                        .then(data => {
+                            addTodoList(data);
+                            //입력값 초기화
+                            document.getElementById('todoTitle').value = '';
+                            document.getElementById('startDate').value = '';
+                            document.getElementById('endDate').value = '';
+
+                            fetchAllTodos();
+                        })
+                        .catch(error => {
+                            console.error("Error :", error);
+                        });
+                }
+
+                // add todo
+                function addTodoList(todo) {
+                    const todoList = document.getElementById('todoListUl');
+                    const listItem = document.createElement('li');
+
+                    listItem.className = 'justify-content-between m-1 row shadow p-3 mb-2 bg-body rounded';
+                    listItem.setAttribute('id', `todo-${todo.toNo}`);
+                    listItem.innerHTML = `
+                            <div class="col">
+                                <strong class="row">${todo.todolistContent}</strong>
+                                <div class="row">${todo.todoStartDate} ~ ${todo.todoEndDate}</div>
+                            </div>
+                            <div class="col-auto">
+                                <button id="todoDelete" name="${todo.toNo}" onclick="deleteTodo(${todo.toNo})" class="col btn btn-danger">x</button>
+                            </div>`;
+                    todoList.appendChild(listItem);
+                }
+
+                // ALL Todo List View
+                function fetchAllTodos() {
+                    fetch(`/api/todolists`, {
+                        method: 'GET',
+                        headers: {'Content-Type': 'application/json'}
+                    })
+                        .then(response => response.json())
+                        .then(todos => {
+                            const todoList = document.getElementById('todoListUl');
+                            todoList.innerHTML = '';
+
+                            todos.forEach(addTodoList);
+
+                            cTodos = todos.map(data => {
+                                let endDate = new Date(data.todoEndDate);
+                                endDate.setDate(endDate.getDate() + 1); // Adjust end date by +1 day
+
+                                return {
+                                    title: data.todolistContent,
+                                    start: data.todoStartDate,
+                                    end: endDate.toISOString().split('T')[0], // Format back to 'YYYY-MM-DD'
+                                    backgroundColor: 'green',
+                                    borderColor: 'green'
+                                };
+                            });
+
+                            calendars(cTodos);
+
+                        })
+                        .catch(error => {
+                            console.error("Error :", error)
+                        });
+                }
+
+                // myStrudy
+                // function fetchAllMyStudy() {
+                //     fetch(`/api/todolists`, {
+                //         method: 'GET',
+                //         headers: {'Content-Type': 'application/json'}
+                //     })
+                //         .then(response => response.json())
+                //         .then(todos => {
+                //             todos.forEach(addTodoList);
+                //
+                //             cTodos = todos.map(data => ({
+                //                 title: data.todolistContent,
+                //                 start: data.todoStartDate,
+                //                 end: data.todoEndDate,
+                //                 backgroundColor: 'blue',
+                //                 borderColor: 'blue'
+                //             }));
+                //             calendars();
+                //         })
+                //         .catch(error => {
+                //             console.error("Error :", error)
+                //         })
+                // }
+
+                // 삭제 요청
+                function deleteTodo(toNo) {
+                    fetch(`/api/todolists/${toNo}`, {
+                        method: 'DELETE',
+                        headers: {'Content-Type': 'application/json'}
+                    })
+                        // .then(response => response.json())
+                        .then(() => {
+                            // 삭제된 항목을 목록에서 제거
+                            const todoItem = document.getElementById(`todo-${toNo}`);
+                            if (todoItem) {
+                                todoItem.remove();
+                                fetchAllTodos();
+                            }
+                        })
+                        .catch(error => console.error("Error : " + error));
+                }
+
+                // 캘린더 생성
+                function calendars(event) {
+                    const calendarEl = document.getElementById("calendar");
+                    let calendar = new FullCalendar.Calendar(calendarEl, {
+                        initialView: "dayGridMonth",
+                        events: event
+                    });
+                    calendar.render();
+                }
+
+                </script>
+                <!--                <button type="button" class="btn-facebook" data-target="#todoListModal" data-toggle="modal">+</button>-->
+            </div> <!--row end -->
+            <custom-todo-list></custom-todo-list>
+            <!-- End of Page Wrapper -->
+            <custom-setting-modal></custom-setting-modal>
+            <custom-scroll-top-btn></custom-scroll-top-btn>
+        </div>
+    </div>
+</div>
+
+<!-- sidebar & topbar & 스크롤 컴포넌트화 -->
+<script th:src="@{js/component/sidebar.js}"></script>
+<script th:src="@{js/component/topbar.js}"></script>
+<script th:src="@{js/component/scrollTopButton.js}"></script>
+<!-- PopupComponent -->
+<script th:src="@{js/component/studyCreateModal.js}"></script>
+<script th:src="@{js/component/studyInfoModal.js}"></script>
+<script th:src="@{js/component/userDropModal.js}"></script>
+<script th:src="@{js/component/userSettingModal.js}"></script>
+<script th:src="@{js/component/todoList.js}"></script>
+<!-- 캘린더 -->
+<script th:src="@{js/index.global.js}"></script>
+
+<!-- 부트스트랩 JS (팝업을 위해 필요) -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<!-- Bootstrap core JavaScript-->
+<script th:src="@{vendor/jquery/jquery.min.js}"></script>
+
+<!-- Core plugin JavaScript-->
+<script th:src="@{vendor/jquery-easing/jquery.easing.min.js}"></script>
+
+<!-- Custom scripts for all pages-->
+<script th:src="@{js/sb-admin-2.min.js}"></script>
+
+
+</body>
+</html>
