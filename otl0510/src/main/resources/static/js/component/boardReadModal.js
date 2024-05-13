@@ -294,7 +294,7 @@ class boardReadModal extends HTMLElement {
                     email: email
                 };
 
-                console.log("폼 데이터: ", replyData); // 폼 데이터 확인
+                console.log("댓글 데이터: ", replyData); // 댓글 데이터 확인
 
                 $.ajax({
                     type: 'POST',
@@ -314,7 +314,7 @@ class boardReadModal extends HTMLElement {
             }
         });
 
-        // 6. 댓글 목록
+        // 6. 댓글 목록/삭제
         const replyListElement = this.querySelector(".replyList");
 
         // 기존의 댓글 목록을 비움
@@ -335,26 +335,67 @@ class boardReadModal extends HTMLElement {
                     const replyItem = document.createElement("li");
                     replyItem.classList.add("list-group-item");
 
-                    // // 댓글 내용과 작성자의 닉네임을 함께 표시
-                    // replyItem.textContent = "작성자: " + response.nicknames[i] + " " + reply.replyContent;
-                    //
-                    // replyListElement.appendChild(replyItem);
-
                     // 새로운 행을 생성
                     const newRow = document.createElement("tr");
+
+                    // 댓글 번호 열을 추가
+                    const replyNoCell = document.createElement("td");
+                    replyNoCell.textContent = reply.replyNo;
+                    replyNoCell.style.width = "10%";
+                    newRow.appendChild(replyNoCell);
 
                     // 작성자의 닉네임 열을 추가
                     const nicknameCell = document.createElement("td");
                     nicknameCell.textContent = nickname;
                     nicknameCell.style.color = "#FD7B38";
+                    nicknameCell.style.width = "20%";
                     newRow.appendChild(nicknameCell);
 
                     // 댓글 내용 열을 추가
                     const contentCell = document.createElement("td");
                     contentCell.textContent = reply.replyContent;
 
-                    contentCell.style.width = "90%";
+                    contentCell.style.width = "70%";
                     newRow.appendChild(contentCell);
+
+                    // 댓글 삭제 버튼 열을 추가
+                    const deleteCell = document.createElement("td");
+
+                    const replyDeleteBtn = document.createElement("button");
+                    replyDeleteBtn.textContent = "X";
+                    replyDeleteBtn.classList.add("btn", "btn-danger");
+                    // 클릭 이벤트 추가
+                    replyDeleteBtn.addEventListener("click", function() {
+
+                        // 삭제할 댓글 번호
+                        const replyNo = response.content[i].replyNo;
+
+                        console.log("댓글이 삭제될 예정입니다.");
+
+                        // 댓글 삭제 요청 보내기
+                        $.ajax({
+                            type: 'POST',
+                            url: '/api/deleteReply',
+                            contentType: 'application/json', // 데이터 형식을 JSON으로 설정
+                            data: JSON.stringify({ replyNo: replyNo }), // JSON 형식으로 데이터 전송
+                            success: function (response) {
+                                // 삭제 성공 시, 해당 댓글 행 제거
+                                newRow.remove();
+                                alert("댓글이 삭제되었습니다.");
+                                location.reload();
+                            },
+                            error: function (xhr, status, error) {
+                                console.error("댓글 삭제 중 에러가 발생했습니다: ", error); // AJAX 요청 실패 확인
+                                console.error("상태 코드: ", status);
+                                console.error("XHR 객체: ", xhr);
+                                alert('댓글을 삭제하는데 실패했습니다: ' + error);
+                            }
+                        });
+                    });
+
+                    deleteCell.style.width = "10%";
+                    deleteCell.appendChild(replyDeleteBtn);
+                    newRow.appendChild(deleteCell);
 
                     // 행을 테이블에 추가
                     replyListElement.appendChild(newRow);
@@ -365,8 +406,6 @@ class boardReadModal extends HTMLElement {
                 alert('댓글 목록을 불러오는데 실패했습니다: ' + error);
             }
         });
-
-        // 7. 댓글 삭제
     }
 }
 

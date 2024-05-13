@@ -1,127 +1,115 @@
 package com.otl.otl.controller;
 
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.otl.otl.domain.Board;
-import com.otl.otl.domain.Member;
 import com.otl.otl.dto.BoardDTO;
-import com.otl.otl.dto.MemberDTO;
-import com.otl.otl.repository.MemberRepository;
-import com.otl.otl.service.BoardService;
+import com.otl.otl.dto.ReplyDTO;
+import com.otl.otl.repository.ReplyRepository;
+import com.otl.otl.service.MemberService;
+import com.otl.otl.service.ReplyService;
 import jakarta.validation.Valid;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.core.user.OAuth2User;
-import org.springframework.ui.Model;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api")
 @Validated // DTO 유효성 검사를 위한 어노테이션
 @Log4j2
-public class BoardController {
+public class ReplyController {
 
-    private final BoardService boardService;
+    private final ReplyService replyService;
+    private final ReplyRepository replyRepository;
+    private final MemberService memberService;
 
-    @Autowired
-    private MemberRepository memberRepository;
-
-    @Autowired
-    public BoardController(BoardService boardService) {
-        this.boardService = boardService;
+    public ReplyController(ReplyService replyService, ReplyRepository replyRepository, MemberService memberService) {
+        this.replyService = replyService;
+        this.replyRepository = replyRepository;
+        this.memberService = memberService;
     }
 
+    @PostMapping("/saveReply")
+    public ResponseEntity<String> saveReply(@Valid @RequestBody ReplyDTO replyDTO) {
 
-    // POST 요청을 처리하는 메소드, 게시글 저장
-    @PostMapping("/saveBoard")
-    public ResponseEntity<String> saveBoard(@Valid @RequestBody BoardDTO boardDTO) {
-        // BoardService를 사용하여 게시글을 저장하고, 성공 여부를 확인합니다.
-        // 게시글 저장 시도 로깅
-        log.info("게시글 저장 시도 : {}", boardDTO);
+        // 댓글 저장 시도 로깅
+        log.info("댓글 저장 시도 : {}", replyDTO);
 
-        Long bno = boardService.register(boardDTO);
+        Long replyNo = replyService.register(replyDTO);
 
         // 저장 결과에 따라 적절한 응답을 반환합니다.
-        if (bno != null) {
-            log.info("게시글이 성공적으로 저장되었습니다. 게시글 ID: {}", bno);
-            return ResponseEntity.status(HttpStatus.CREATED).body("게시글이 성공적으로 등록되었습니다.");
+        if (replyNo != null) {
+            log.info("댓글이 성공적으로 저장되었습니다. 댓글 번호: {}", replyNo);
+            return ResponseEntity.status(HttpStatus.CREATED).body("댓글이 성공적으로 등록되었습니다.");
         } else {
-            log.info("게시글 저장 실패: {}", boardDTO);
-            return ResponseEntity.badRequest().body("게시글 등록에 실패했습니다.");
+            log.info("댓글 저장 실패: {}", replyDTO);
+            return ResponseEntity.badRequest().body("댓글 등록에 실패했습니다.");
         }
     }
+    @GetMapping("/replyList")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> reply(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
+        log.info("댓글 요청 - 페이지 번호: {}, 페이지 크기: {}", page, size);
 
-    @GetMapping("/readBoard")
-    public ResponseEntity<MemberDTO> readBoard(@RequestParam Long bno) throws JsonProcessingException {
-        // 게시글 조회 시도 로깅
-        log.info("게시글 조회 시도 : {}", bno);
+        // 댓글 목록 조회
+        Page<ReplyDTO> replyPage = replyService.findReplyies(page, size);
 
-        BoardDTO boardDTO = boardService.readOne(bno);
+        // JSON 데이터를 담을 Map 생성
+        Map<String, Object> response = new HashMap<>();
+        response.put("content", replyPage.getContent()); // 댓글 목록
+        response.put("currentPage", replyPage.getNumber()); // 현재 페이지 번호
+        response.put("totalPages", replyPage.getTotalPages()); // 전체 페이지 수
 
-        // 저장 결과에 따라 적절한 응답을 반환합니다.
-        if (boardDTO != null) {
-            // 이메일 주소로 회원 조회
-            Optional<Member> optionalMember = memberRepository.findByEmail(boardDTO.getEmail());
+        // 각 댓글의 작성자 이메일을 가져와서 닉네임을 찾음
+        List<String> emails = replyPage.getContent().stream()
+                .map(replyDTO -> replyDTO.getEmail())
+                .collect(Collectors.toList());
 
-            MemberDTO memberDTO = new MemberDTO();
-            optionalMember.ifPresent(member -> {
-                // 닉네임, 프로필이미지 가져와서 MemberDTO에 추가
-                memberDTO.setNickname(member.getNickname());
-                memberDTO.setMemberProfileImage(member.getMemberProfileImage());
-            });
-
-            // boardDTO와 memberDTO의 정보를 문자열로 조합하여 반환
-            //String response = "BoardDTO: " + boardDTO.toString() + ", MemberDTO: " + memberDTO.toString();
-
-            log.info("게시글 조회 성공: {}", bno);
-            return ResponseEntity.ok().body(memberDTO);
-        } else {
-            log.info("게시글 조회 실패: {}", bno);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        // 각 이메일에 해당하는 닉네임을 찾아서 닉네임 리스트에 추가
+        List<String> nicknames = new ArrayList<>();
+        for (String email : emails) {
+            String nickname = memberService.findNicknameByEmail(email);
+            nicknames.add(nickname);
         }
+        // 결과에 닉네임 리스트 추가
+        response.put("nicknames", nicknames);
+
+        // 댓글 번호 리스트 초기화
+        List<Long> replyNos = new ArrayList<>();
+
+        // 각 댓글의 댓글 번호를 가져와서 리스트에 추가
+        for (ReplyDTO replyDTO : replyPage.getContent()) {
+            Long replyNo = replyDTO.getReplyNo();
+            replyNos.add(replyNo);
+        }
+
+        // 결과에 댓글 번호 리스트 추가
+        response.put("replyNos", replyNos);
+
+        return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/modifyBoard")
-    public ResponseEntity<BoardDTO> modifyBoard(@Valid @RequestBody BoardDTO boardDTO) {
-        // 클라이언트에서 보낸 수정된 데이터가 boardDTO에 담겨있음
+    @PostMapping("/deleteReply")
+    public ResponseEntity<Void> deleteReply(@RequestBody ReplyDTO replyDTO) {
+        // 클라이언트에서 보낸 삭제 예정인 댓글의 번호를 가져옴
+        Long replyNo = replyDTO.getReplyNo();
 
-        // 게시글 수정 시도 로깅
-        log.info("게시글 수정 시도 : {}", boardDTO.getBno());
-
-        Board result = boardService.modify(boardDTO);
-
-        log.info("게시글이 성공적으로 수정되었습니다. 게시글 ID: {}", result.getBno());
-
-        // 수정된 데이터를 클라이언트에게 반환
-        return ResponseEntity.ok().body(boardDTO);
-    }
-
-    @PostMapping("/deleteBoard")
-    public ResponseEntity<Void> deleteBoard(@RequestBody BoardDTO boardDTO) {
-        // 클라이언트에서 보낸 삭제 처리된 게시글의 번호를 가져옴
-        Long bno = boardDTO.getBno();
-
-        // BoardServiceImpl에서 is_deleted 가 true가 된 상황
+        // 그냥 댓글 삭제
 
         // 게시글 삭제 시도 로깅
-        log.info("게시글 삭제 시도 : {}", bno);
+        log.info("댓글 삭제 시도 : {}", replyNo);
 
-        boardService.remove(bno);
+        replyService.remove(replyNo);
 
-        log.info("게시글이 성공적으로 삭제되었습니다. 게시글 ID: {}", bno);
+        log.info("댓글이 성공적으로 삭제되었습니다. 댓글 번호: {}", replyNo);
 
         // 수정된 데이터를 클라이언트에게 반환
         return ResponseEntity.ok().build();
     }
 }
-
