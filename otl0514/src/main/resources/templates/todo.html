@@ -1,0 +1,130 @@
+<script th:inline="javascript">
+    // Global email variable
+    let email = `[[${email}]]`.replace(/"/g, '');
+
+    // Document ready function
+    document.addEventListener("DOMContentLoaded", () => {
+        fetchAllTodos();
+        showAllTodos();
+        showCompletedTodos();
+        showDeletedTodos();
+    });
+
+    // Submit new Todo
+    function submitTodo(e) {
+        e.preventDefault();
+        const todoTitle = document.getElementById("todoTitle").value;
+        const startDate = document.getElementById("startDate").value;
+        const endDate = document.getElementById("endDate").value;
+
+        if (!todoTitle || !startDate || !endDate) {
+            alert("내용과 날짜를 모두 입력해주세요.");
+            return;
+        } else if (new Date(startDate) > new Date(endDate)) {
+            alert("시작 날짜는 종료 날짜보다 이후일 수 없습니다.");
+            return;
+        }
+
+        fetch('/api/todolists', {
+            method: 'POST',
+            headers: {'Content-Type': "application/json"},
+            body: JSON.stringify({
+                todolistContent: todoTitle,
+                todoStartDate: startDate,
+                todoEndDate: endDate,
+                memberEmail: email
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                addTodoList(data);
+                document.getElementById('todoTitle').value = '';
+                document.getElementById('startDate').value = '';
+                document.getElementById('endDate').value = '';
+                fetchAllTodos();
+            })
+            .catch(error => console.error("Error :", error));
+    }
+
+    // Fetch and display all todos
+    function fetchAllTodos() {
+        fetch('/api/todolists', {
+            method: 'GET',
+            headers: {'Content-Type': 'application/json'}
+        })
+            .then(response => response.json())
+            .then(todos => {
+                const todoList = document.getElementById('todoListing');
+                todoList.innerHTML = '';
+                todos.forEach(todo => addTodoItemToList(todoList, todo));
+                calendars(todos);
+            })
+            .catch(error => console.error("Error :", error));
+    }
+
+    // Add a todo item to a list
+    function addTodoItemToList(listElement, todo) {
+        const listItem = document.createElement('li');
+        listItem.className = 'justify-content-between m-1 row shadow p-3 mb-2 bg-body rounded';
+        listItem.setAttribute('id', `todo-${todo.toNo}`);
+        listItem.innerHTML = `
+        <div class="col">
+            <strong class="row">${todo.todolistContent}</strong>
+            <div class="row">${todo.todoStartDate} ~ ${todo.todoEndDate}</div>
+        </div>
+        <div class="col-auto" style="display: ${listElement.id === 'todoListing' ? 'block' : 'none'};">
+            <button id="todoComplete-${todo.toNo}" class="col btn btn-info mb-1">V</button>
+            <button id="todoDelete-${todo.toNo}" class="col btn btn-danger mt-1">X</button>
+        </div>
+    `;
+        listElement.appendChild(listItem);
+    }
+
+    // Handle marking a todo as completed
+    function isCompletedTrue(toNo) {
+        fetch(`/api/todolists/completed/${toNo}`, {
+            method: 'PATCH',
+            headers: {'Content-Type': 'application/json'}
+        })
+            .then(() => {
+                alert('Todo marked as completed!');
+                removeTodoItem(toNo, 'completedTodo');
+            })
+            .catch(error => console.error("Error : " + error));
+    }
+
+    // Handle marking a todo as deleted
+    function isDeletedTrue(toNo) {
+        fetch(`/api/todolists/delete/${toNo}`, {
+            method: 'PATCH',
+            headers: {'Content-Type': 'application/json'}
+        })
+            .then(() => {
+                alert('Todo marked as deleted!');
+                removeTodoItem(toNo, 'deleteTodo');
+            })
+            .catch(error => console.error("Error : " + error));
+    }
+
+    // Remove or hide a todo item from the list
+    function removeTodoItem(toNo, tabId) {
+        const todoItem = document.querySelector(`#todo-${toNo}`);
+        if (todoItem) {
+            todoItem.style.display = 'none'; // Optionally, you could use todoItem.remove();
+        }
+        // Optionally add to completed or deleted list
+        if (tabId === 'completedTodo') {
+            addTodoItemToList(document.getElementById('todoListCompleted'), todoItem);
+        } else if (tabId === 'deleteTodo') {
+            addTodoItemToList(document.getElementById('todoListDeleted'), todoItem);
+        }
+    }
+
+    // Refresh page data
+    function refreshPage() {
+        fetchAllTodos();
+        showAllTodos();
+        showCompletedTodos();
+        showDeletedTodos();
+    }
+</script>
