@@ -15,6 +15,5 @@ public interface BoardService {
 
     Page<BoardDTO> findBoards(int page, int size);
 
-    Page<Board> searchAll(String[] types, String keyword, Pageable pageable);
-
+    Page<BoardDTO> searchBoards(String type, String keyword, int page, int size);
 }

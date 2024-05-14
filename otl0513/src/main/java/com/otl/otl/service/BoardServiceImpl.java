@@ -26,7 +26,7 @@ import java.util.Optional;
 @Log4j2
 @RequiredArgsConstructor
 @Transactional
-public class BoardServiceImpl<QBoard> implements BoardService{
+public class BoardServiceImpl implements BoardService{
 
     private final BoardRepository boardRepository;
     private  final MemberRepository memberRepository;
@@ -71,42 +71,28 @@ public class BoardServiceImpl<QBoard> implements BoardService{
     }
 
     @Override
-    public Page<Board> searchAll(String[] types, String keyword, Pageable pageable) {
-        QBoard board = QBoard.board;
-        JPQLQuery<Board> query = from(board);
+    @Transactional(readOnly = true)
+    public Page<BoardDTO> searchBoards(String type, String keyword, int page, int size) {
+        log.info("게시글 검색: 타입 {}, 키워드 {}, 페이지 {}, 크기 {}", type, keyword, page, size);
 
-        if ((types != null && types.length > 0) && keyword != null) { //검색 조건과 키워드가 있다면
+        PageRequest pageRequest = PageRequest.of(page, size);
 
-            BooleanBuilder booleanBuilder = new BooleanBuilder(); // (
+        Page<Board> boardPage;
+        switch (type) {
+            case "t":
+                boardPage = boardRepository.findByBoardTitleContainingIgnoreCaseAndIsDeletedFalse(keyword, pageRequest);
+                break;
+            case "c":
+                boardPage = boardRepository.findByBoardContentContainingIgnoreCaseAndIsDeletedFalse(keyword, pageRequest);
+                break;
+            case "n":
+                boardPage = boardRepository.findByMember_NicknameContainingIgnoreCaseAndIsDeletedFalse(keyword, pageRequest);
+                break;
+            default:
+                boardPage = boardRepository.findByIsDeletedFalse(pageRequest);
+        }
 
-            for (String type : types) {
-
-                switch (type) {
-                    case "t":
-                        booleanBuilder.or(board.boardTitle.contains(keyword));
-                        break;
-                    case "c":
-                        booleanBuilder.or(board.boardContent.contains(keyword));
-                        break;
-                    case "n":
-                        booleanBuilder.or(board.email.contains(keyword));
-                        break;
-                }
-            }//end for
-            query.where(booleanBuilder);
-        }//end if
-
-        //bno > 0
-        query.where(board.bno.gt(0L));
-
-        //paging
-        this.getQuerydsl().applyPagination(pageable, query);
-
-        List<Board> list = query.fetch();
-
-        long count = query.fetchCount();
-
-        return new PageImpl<>(list, pageable, count);
+        return boardPage.map(this::entityToDto);
     }
 
     // Board 엔티티를 BoardDTO로 변환합니다.

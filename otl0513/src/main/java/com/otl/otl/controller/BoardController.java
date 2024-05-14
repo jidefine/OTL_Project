@@ -125,20 +125,4 @@ public class BoardController {
         // 수정된 데이터를 클라이언트에게 반환
         return ResponseEntity.ok().build();
     }
-
-    @GetMapping("/board/list")
-    public ResponseEntity<Page<BoardDTO>> findBoards(@RequestParam(defaultValue = "0") int page,
-                                                     @RequestParam(defaultValue = "10") int size,
-                                                     @RequestParam(required = false) String type,
-                                                     @RequestParam(required = false) String keyword) {
-        // 검색 로직 및 반환
-        // 검색어와 타입이 모두 주어지지 않으면 모든 게시글 반환
-        if (type == null || keyword == null || type.isEmpty() || keyword.isEmpty()) {
-            return ResponseEntity.ok(boardService.findBoards(page, size));
-        }
-
-        // 검색 기능을 수행하여 결과 반환
-        Page<BoardDTO> boardPage = boardService.searchBoards(type, keyword, page, size);
-        return ResponseEntity.ok(boardPage);
-    }
 }
