@@ -1,6 +1,7 @@
 package com.otl.otl.service;
 
 import com.otl.otl.domain.*;
+import com.otl.otl.dto.MemberDTO;
 import com.otl.otl.dto.MemberStudyDTO;
 import com.otl.otl.dto.MemberStudyProjection.MemberStudyProjectionImpl;
 import com.otl.otl.dto.StudyDTO;
@@ -16,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,6 +30,41 @@ public class MemberStudyServiceImpl implements MemberStudyService {
     private final MemberRepository memberRepository;
     private final StudyRepository studyRepository;
     private final MemberStudyRepository memberStudyRepository;
+
+    /*  WHERE sno = ? AND is_accpeted = 0 AND is_managed = 1 ;
+       - 방장 페이지 -> 참가 대기 멤버 조회 (GET)
+    */
+
+
+    @Override
+    public List<MemberStudyDTO> findWaitingParticipant(Long sno, Boolean isAccepted, Boolean isManaged) {
+        List<MemberStudy> memberStudies = memberStudyRepository.findMemberBySnoAndAcceptedFalse(sno, isAccepted, isManaged);
+
+        // 조회된 MemberStudy 엔티티를 처리하여 DTO로 변환
+        List<MemberStudyDTO> memberStudyDTOs = new ArrayList<>();
+        for (MemberStudy memberStudy : memberStudies) {
+            // 이메일로 회원 조회
+            Optional<Member> optionalMember = memberRepository.findByEmail(memberStudy.getMember().getEmail());
+            Member member = optionalMember.orElse(null);
+
+            if (member != null) {
+                Study study = memberStudy.getStudy(); // 해당 스터디 가져오기
+
+                // DTO 객체 생성 및 데이터 설정
+                MemberStudyDTO memberStudyDTO = MemberStudyDTO.builder()
+                        .msNo(memberStudy.getMsNo())
+                        .member(member)       // 스터디 참가 멤버
+                        .study(study)        // 해당 스터디
+                        .isAccepted(memberStudy.isAccepted())    // 참가 상태
+                        .isManaged(memberStudy.isManaged())    // 방장 여부
+                        .comment(memberStudy.getComment())  // 참가신청 댓글 설정
+                        .build();
+                memberStudyDTOs.add(memberStudyDTO); // DTO 객체를 리스트에 추가
+            }
+        }
+
+        return memberStudyDTOs; // DTO 리스트 반환
+    }
 
     @Override
     public Long register(MemberStudyDTO memberStudyDTO) {
@@ -71,30 +108,4 @@ public class MemberStudyServiceImpl implements MemberStudyService {
     public void remove(Long msNo) {
 
     }
-
-//    private final MemberStudyRepository memberStudyRepository;
-//    private final CustomConverters customConverters;
-//
-//    public MemberStudyServiceImpl(MemberStudyRepository memberStudyRepository, CustomConverters customConverters) {
-//        this.memberStudyRepository = memberStudyRepository;
-//        this.customConverters = customConverters;
-//    }
-//
-//    // 컨버터
-//    public StudyListDTO ProjectionToDTO(MemberStudyProjectionImpl projection) {
-//        return customConverters.ProjectionToDTO(projection);
-//    }
-//    public StudyListDTO StudyToDto(Study study) {
-//        return customConverters.StudyToDto(study);
-//    }
-//    public MemberStudy MemberStudyDTOToDomain(MemberStudyDTO memberStudyDTO, MemberStudy memberStudy) {
-//        return customConverters.MemberStudyDTOToDomain(memberStudyDTO, memberStudy);
-//    }
-//
-//
-//
-//    @Override
-//    public List<MemberStudy> findByMemberEmail(String email) {
-//        return memberStudyRepository.findByMemberEmail(email);
-//    }
 }

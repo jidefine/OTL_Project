@@ -11,4 +11,6 @@ public interface MemberStudyRepository extends JpaRepository<MemberStudy, Long>,
     List<MemberStudy> findByMemberEmail(String email);
     List<MemberStudy> findByMember(Member member);
 
+    List<MemberStudy> findMemberBySnoAndAcceptedFalse(Long sno, Boolean isAccepted, Boolean isManaged);
 }
+

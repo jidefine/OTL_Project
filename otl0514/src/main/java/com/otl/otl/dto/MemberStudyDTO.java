@@ -2,6 +2,7 @@ package com.otl.otl.dto;
 
 import com.otl.otl.domain.Member;
 import com.otl.otl.domain.Study;
+import jakarta.persistence.Column;
 import lombok.*;
 
 @Getter

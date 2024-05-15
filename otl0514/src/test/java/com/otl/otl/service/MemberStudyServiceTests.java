@@ -13,6 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Commit;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -65,5 +66,28 @@ public class MemberStudyServiceTests {
         // 참가신청 등록
         Long msNo = memberStudyService.register(memberStudyDTO);
         assertNotNull(msNo);
+    }
+
+    @Test
+    @Transactional
+    public void testRequestRead(){
+        Long sno = 3L; // 테스트용 스터디 번호
+
+        // 참가신청 조회
+        List<MemberStudyDTO> waitingParticipants = memberStudyService.findWaitingParticipant(sno, false, false);
+
+        // 조회된 참가신청이 비어있지 않은지 확인
+        assertFalse(waitingParticipants.isEmpty());
+
+        // 참가자 목록 출력
+        log.info("참가 신청 대기중인 참가자 목록:");
+        for (MemberStudyDTO participant : waitingParticipants) {
+            log.info("참가자 이메일: {}", participant.getMember().getEmail());
+            //log.info("참가자 닉네임: {}", participant.getNickname());
+            //log.info("참가자 프로필 이미지: {}", participant.getMemberProfileImage());
+            //log.info("참가자 카테고리: {}", participant.getInterests());
+            log.info("참가신청 댓글: {}", participant.getComment());
+            log.info("---------------------------------------------");
+        }
     }
 }
