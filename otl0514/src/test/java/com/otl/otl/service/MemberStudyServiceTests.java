@@ -86,8 +86,7 @@ public class MemberStudyServiceTests {
             //log.info("참가자 닉네임: {}", participant.getNickname());
             //log.info("참가자 프로필 이미지: {}", participant.getMemberProfileImage());
             //log.info("참가자 카테고리: {}", participant.getInterests());
-            log.info("참가신청 댓글: {}", participant.getComment());
-            log.info("---------------------------------------------");
+        
         }
     }
 }
