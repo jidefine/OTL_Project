@@ -7,7 +7,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface BoardService {
-    //새로운 게시글을 등록합니다.
     Long register(BoardDTO boardDTO);
     BoardDTO readOne(Long bno); // 조회
     Board modify(BoardDTO boardDTO); // 수정
