@@ -7,7 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface BoardService {
-    Long register(BoardDTO boardDTO);
+    Long register(BoardDTO boardDTO); // 등록
     BoardDTO readOne(Long bno); // 조회
     Board modify(BoardDTO boardDTO); // 수정
     void remove(Long bno); // 삭제
